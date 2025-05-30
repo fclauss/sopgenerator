@@ -1,0 +1,172 @@
+<context>
+# Overview  
+The Assembly SOP Generator is a web-based application designed to streamline the creation of Standard Operating Procedures (SOPs) for manufacturing assembly processes. It solves the problem of time-consuming, manual SOP creation by providing a structured, user-friendly interface that guides users through the process of documenting assembly procedures. The target users are manufacturing engineers, quality assurance teams, and production managers who need to create consistent, professional SOPs for assembly operations.
+
+The application provides significant value by:
+- Reducing SOP creation time from hours to minutes
+- Ensuring consistency across all SOPs through standardized templates
+- Maintaining reusable databases of parts, tools, and fixtures
+- Generating professional, print-ready documentation
+- Improving safety compliance through structured safety requirement capture
+
+# Core Features  
+## 1. Database Management System
+- **Parts Database**: Centralized repository for all assembly parts with part numbers, descriptions, and specifications
+- **Tools Database**: Catalog of required tools with sizes, specifications, and identification numbers
+- **Fixtures Database**: Collection of assembly fixtures, jigs, and testing devices with unique identifiers
+- **Reusability**: Items added once can be reused across multiple SOPs, reducing redundant data entry
+
+## 2. SOP Information Capture
+- **Basic Information**: SOP title, part numbers, revision levels, author/department information
+- **Bill of Materials (BOM)**: Dynamic selection from parts database with quantities
+- **Required Tools & Equipment**: Selection from tools and fixtures databases
+- **Safety Requirements**: Standardized safety pictograms and custom safety notes
+- **Assembly Sequence**: Step-by-step procedure documentation with quality checkpoints
+
+## 3. Professional SOP Generation
+- **Formatted Output**: Generates professional, standardized SOP documents
+- **Visual Layout**: Includes tables, headers, and structured formatting
+- **Image Placeholders**: Designated spaces for assembly step images
+- **Quality Integration**: Embedded quality checkpoints within assembly steps
+- **Print-Ready Format**: Professional document suitable for shop floor use
+
+## 4. User Experience Features
+- **Intuitive Interface**: Clean, modern UI following Optimal AI brand guidelines
+- **Dynamic Forms**: Add/remove items dynamically for BOM, tools, and assembly steps
+- **Real-time Preview**: Live preview of generated SOP as users input information
+- **Responsive Design**: Works across desktop and tablet devices for shop floor accessibility
+
+# User Experience  
+## User Personas
+- **Manufacturing Engineer**: Creates detailed SOPs for new assembly processes, needs comprehensive documentation capabilities
+- **Quality Assurance Manager**: Reviews and approves SOPs, requires clear quality checkpoint integration
+- **Production Supervisor**: Uses SOPs on shop floor, needs clear, visual, easy-to-follow procedures
+
+## Key User Flows
+1. **Database Setup Flow**: User adds parts, tools, and fixtures to respective databases for reuse
+2. **SOP Creation Flow**: User creates new SOP by filling out basic info → selecting BOM items → choosing tools → defining safety requirements → documenting assembly steps → generating final SOP
+3. **SOP Review Flow**: User previews generated SOP, makes adjustments, and exports final document
+
+## UI/UX Considerations
+- **Progressive Disclosure**: Information organized in logical sections to avoid overwhelming users
+- **Visual Hierarchy**: Clear section headers and color coding (Optimal AI brand colors: #055263, #3a7d8c, #ff7d3b)
+- **Accessibility**: High contrast, clear typography, keyboard navigation support
+- **Mobile Responsiveness**: Tablet-friendly for shop floor use
+</context>
+<PRD>
+# Technical Architecture  
+## System Components
+- **Frontend**: Modern web application using HTML5, CSS3, and JavaScript
+- **Database Layer**: Local storage or lightweight database for parts/tools/fixtures databases
+- **Document Generation Engine**: Client-side PDF/HTML generation for SOP output
+- **State Management**: JavaScript-based state management for form data and user inputs
+
+## Data Models
+- **Part Model**: {id, name, partNumber, description, specifications, category}
+- **Tool Model**: {id, name, size, specifications, identifier, category}
+- **Fixture Model**: {id, name, identifier, description, category}
+- **SOP Model**: {title, partNumber, revision, author, bom[], tools[], safety[], steps[]}
+- **Assembly Step Model**: {stepNumber, description, parts[], tools[], qualityCheck, qualityDescription}
+
+## APIs and Integrations
+- **Local Storage API**: For persisting database items and SOP drafts
+- **Print API**: Browser print functionality for SOP output
+- **File Export API**: PDF generation or HTML export capabilities
+- **Image Upload API**: Future integration for step images
+
+## Infrastructure Requirements
+- **Web Server**: Static file hosting (can be served from any web server)
+- **Browser Compatibility**: Modern browsers supporting ES6+, CSS Grid, Flexbox
+- **Storage**: Client-side storage for databases and SOP data
+- **Performance**: Optimized for quick loading and responsive interactions
+
+# Development Roadmap  
+## Phase 1: MVP Foundation (Core SOP Creation)
+- Basic HTML structure and CSS styling following Optimal AI brand guidelines
+- Core form sections: Basic Information, BOM, Tools, Safety, Assembly Steps
+- Simple database management (add/remove items from parts, tools, fixtures)
+- Basic SOP generation with formatted HTML output
+- Local storage for data persistence
+
+## Phase 2: Enhanced Database Management
+- Advanced database features: edit existing items, categorization, search functionality
+- Import/export database functionality
+- Validation and error handling for database operations
+- Improved UI for database management with better visual organization
+
+## Phase 3: Advanced SOP Features
+- Quality checkpoint integration with detailed quality procedures
+- Image upload and management for assembly steps
+- SOP templates and customization options
+- Advanced formatting options for generated SOPs
+- Print optimization and PDF export capabilities
+
+## Phase 4: User Experience Enhancements
+- Drag-and-drop reordering of assembly steps
+- Auto-save functionality for SOP drafts
+- SOP versioning and revision management
+- Advanced search and filtering for databases
+- Keyboard shortcuts and accessibility improvements
+
+## Phase 5: Professional Features
+- Multi-user support and user management
+- SOP approval workflows
+- Integration with external systems (ERP, PLM)
+- Advanced reporting and analytics
+- Cloud storage and synchronization
+
+# Logical Dependency Chain
+## Foundation First (Phase 1)
+1. **HTML Structure**: Create semantic HTML structure for all form sections
+2. **CSS Styling**: Implement Optimal AI brand styling and responsive design
+3. **Basic JavaScript**: Form handling, dynamic add/remove functionality
+4. **Local Storage**: Data persistence for databases and SOP data
+5. **SOP Generation**: Basic HTML output generation
+
+## Quick Usability (Phase 1 continued)
+6. **Database Management**: Add/remove functionality for parts, tools, fixtures
+7. **Form Integration**: Connect databases to BOM and tools selection
+8. **Preview Functionality**: Real-time SOP preview as users input data
+9. **Basic Validation**: Ensure required fields and data integrity
+
+## Iterative Improvements (Phases 2-5)
+10. **Enhanced Database**: Advanced database features building on basic foundation
+11. **Advanced SOP Features**: Quality checkpoints, images, templates
+12. **UX Enhancements**: Drag-drop, auto-save, keyboard shortcuts
+13. **Professional Features**: Multi-user, workflows, integrations
+
+# Risks and Mitigations  
+## Technical Challenges
+- **Risk**: Complex state management across multiple form sections
+- **Mitigation**: Use structured JavaScript objects and clear data flow patterns
+
+- **Risk**: Browser compatibility issues with modern CSS features
+- **Mitigation**: Progressive enhancement and fallbacks for older browsers
+
+## MVP Scope Management
+- **Risk**: Feature creep leading to delayed MVP delivery
+- **Mitigation**: Strict adherence to Phase 1 scope, defer advanced features to later phases
+
+- **Risk**: Over-engineering the database management system
+- **Mitigation**: Start with simple local storage, evolve to more complex solutions in later phases
+
+## Resource Constraints
+- **Risk**: Limited development time for comprehensive testing
+- **Mitigation**: Focus on core user flows in MVP, implement comprehensive testing in Phase 2
+
+- **Risk**: Balancing feature completeness with usability
+- **Mitigation**: Regular user testing with manufacturing engineers to validate approach
+
+# Appendix  
+## Research Findings
+- Manufacturing teams currently use Word/Excel for SOP creation, leading to inconsistent formatting
+- Average SOP creation time is 2-4 hours per procedure
+- Safety compliance is critical and requires standardized pictograms
+- Visual assembly steps significantly improve shop floor usability
+
+## Technical Specifications
+- **Target Browsers**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+- **Screen Resolutions**: Desktop (1920x1080), Tablet (1024x768)
+- **Performance Targets**: Page load < 2 seconds, form interactions < 100ms
+- **Accessibility**: WCAG 2.1 AA compliance for manufacturing environment use
+</PRD> 

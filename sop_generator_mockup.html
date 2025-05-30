@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assembly SOP Generator - MVP Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f2f4f5;
+            color: #4d5d65;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background-color: #055263;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .form-section {
+            background: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            color: #055263;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #3a7d8c;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-grid.single {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #055263;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3a7d8c;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .add-button {
+            background-color: #ff7d3b;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .add-button:hover {
+            background-color: #e66a28;
+        }
+        
+        .dynamic-item {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid #3a7d8c;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .remove-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .safety-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .safety-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .pictogram {
+            width: 30px;
+            height: 30px;
+            background-color: #ffd700;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .step-item {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid #055263;
+        }
+        
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .step-number {
+            background-color: #055263;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .selected-item {
+            background-color: #3a7d8c;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .generate-button {
+            background-color: #055263;
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 2rem;
+            transition: background-color 0.3s;
+        }
+        
+        .generate-button:hover {
+            background-color: #044052;
+        }
+        
+        .preview-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+        
+        .sop-preview {
+            border: 2px solid #e0e0e0;
+            padding: 2rem;
+            font-family: 'Times New Roman', serif;
+            background-color: white;
+        }
+        
+        .sop-header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sop-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .sop-table th, .sop-table td {
+            border: 1px solid #000;
+            padding: 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .sop-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .image-placeholder {
+            width: 200px;
+            height: 150px;
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏭 Assembly SOP Generator</h1>
+    </div>
+    
+    <div class="container">
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <h2 class="section-title">1. Basic Information</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="sop-title">SOP Title</label>
+                    <input type="text" id="sop-title" placeholder="e.g., Manual Assembly of Door Handle Mechanism" value="Manual Assembly of Door Handle Mechanism">
+                </div>
+                <div class="form-group">
+                    <label for="part-number">Part Number/Assembly Name</label>
+                    <input type="text" id="part-number" placeholder="e.g., DH-001-A" value="DH-001-A">
+                </div>
+                <div class="form-group">
+                    <label for="revision">Revision Level</label>
+                    <input type="text" id="revision" placeholder="e.g., Rev. 1.0" value="Rev. 1.0">
+                </div>
+                <div class="form-group">
+                    <label for="author">Author/Department</label>
+                    <input type="text" id="author" placeholder="e.g., Manufacturing Engineering" value="Manufacturing Engineering">
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Management Section -->
+        <div class="form-section">
+            <h2 class="section-title">2. Manage Your Database</h2>
+            <p style="margin-bottom: 1rem; color: #666;">Add items to your database once, reuse across multiple SOPs</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h3 style="color: #055263; margin-bottom: 1rem;">Parts Database</h3>
+                    <div class="dynamic-item">
+                        <strong>Part A - Housing</strong><br>
+                        <small>P/N: DH-001-A-01</small>
+                    </div>
+                    <div class="dynamic-item">
+                        <strong>Part B - Lever</strong><br>
+                        <small>P/N: DH-001-A-02</small>
+                    </div>
+                    <button class="add-button" onclick="addDatabaseItem('parts')">+ Add Part</button>
+                </div>
+                
+                <div>
+                    <h3 style="color: #055263; margin-bottom: 1rem;">Tools Database</h3>
+                    <div class="dynamic-item">
+                        <strong>Phillips Screwdriver</strong><br>
+                        <small>Size: #2</small>
+                    </div>
+                    <div class="dynamic-item">
+                        <strong>Assembly Fixture</strong><br>
+                        <small>ID: FIX-DH-001</small>
+                    </div>
+                    <button class="add-button" onclick="addDatabaseItem('tools')">+ Add Tool</button>
+                </div>
+                
+                <div>
+                    <h3 style="color: #055263; margin-bottom: 1rem;">Fixtures Database</h3>
+                    <div class="dynamic-item">
+                        <strong>Door Handle Jig</strong><br>
+                        <small>ID: JIG-DH-001</small>
+                    </div>
+                    <div class="dynamic-item">
+                        <strong>Testing Device</strong><br>
+                        <small>ID: TEST-DH-001</small>
+                    </div>
+                    <button class="add-button" onclick="addDatabaseItem('fixtures')">+ Add Fixture</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bill of Materials Section -->
+        <div class="form-section">
+            <h2 class="section-title">3. Bill of Materials</h2>
+            <div class="dynamic-item">
+                <div class="item-header">
+                    <h4>BOM Item 1</h4>
+                    <button class="remove-button">Remove</button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Select from Parts Database</label>
+                        <select>
+                            <option>Part A - Housing (P/N: DH-001-A-01)</option>
+                            <option>Part B - Lever (P/N: DH-001-A-02)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" value="1">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dynamic-item">
+                <div class="item-header">
+                    <h4>BOM Item 2</h4>
+                    <button class="remove-button">Remove</button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Select from Parts Database</label>
+                        <select>
+                            <option>Part B - Lever (P/N: DH-001-A-02)</option>
+                            <option>Part A - Housing (P/N: DH-001-A-01)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" value="1">
+                    </div>
+                </div>
+            </div>
+            
+            <button class="add-button">+ Add BOM Item</button>
+        </div>
+
+        <!-- Required Tools Section -->
+        <div class="form-section">
+            <h2 class="section-title">4. Required Tools & Equipment</h2>
+            <div class="selected-items">
+                <div class="selected-item">Phillips Screwdriver <span>×</span></div>
+                <div class="selected-item">Assembly Fixture <span>×</span></div>
+                <div class="selected-item">Testing Device <span>×</span></div>
+            </div>
+            <select style="margin-top: 1rem;">
+                <option>Select tool to add...</option>
+                <option>Phillips Screwdriver (Size: #2)</option>
+                <option>Assembly Fixture (ID: FIX-DH-001)</option>
+                <option>Door Handle Jig (ID: JIG-DH-001)</option>
+                <option>Testing Device (ID: TEST-DH-001)</option>
+            </select>
+        </div>
+
+        <!-- Safety Requirements Section -->
+        <div class="form-section">
+            <h2 class="section-title">5. Safety Requirements</h2>
+            <div class="safety-grid">
+                <div class="safety-item">
+                    <input type="checkbox" id="cutting" checked>
+                    <div class="pictogram">⚠️</div>
+                    <label for="cutting">Sharp Edges/Cutting Risk</label>
+                </div>
+                <div class="safety-item">
+                    <input type="checkbox" id="pinching" checked>
+                    <div class="pictogram">🤏</div>
+                    <label for="pinching">Pinch Points</label>
+                </div>
+                <div class="safety-item">
+                    <input type="checkbox" id="heat">
+                    <div class="pictogram">🔥</div>
+                    <label for="heat">Heat/Temperature</label>
+                </div>
+                <div class="safety-item">
+                    <input type="checkbox" id="laser">
+                    <div class="pictogram">⚡</div>
+                    <label for="laser">Laser/Electrical</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Additional Safety Notes</label>
+                <textarea placeholder="Describe specific safety precautions for this assembly process...">Always wear safety glasses. Be careful of sharp edges on Part A housing. Ensure fixture is properly locked before starting assembly.</textarea>
+            </div>
+        </div>
+
+        <!-- Assembly Steps Section -->
+        <div class="form-section">
+            <h2 class="section-title">6. Assembly Sequence</h2>
+            
+            <div class="step-item">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <button class="remove-button">Remove Step</button>
+                </div>
+                <div class="form-group">
+                    <label>Step Description</label>
+                    <textarea placeholder="Describe this assembly step...">Insert Part A (housing) into Assembly Fixture FIX-DH-001. Ensure part is fully seated and fixture arms are locked.</textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Parts Used in This Step</label>
+                        <div class="selected-items">
+                            <div class="selected-item">Part A - Housing <span>×</span></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tools/Fixtures Used</label>
+                        <div class="selected-items">
+                            <div class="selected-item">Assembly Fixture <span>×</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox"> This step includes a quality checkpoint
+                    </label>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <button class="remove-button">Remove Step</button>
+                </div>
+                <div class="form-group">
+                    <label>Step Description</label>
+                    <textarea placeholder="Describe this assembly step...">Place Part B (lever) on top of Part A. Align the mounting holes and ensure proper orientation using the alignment pins.</textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Parts Used in This Step</label>
+                        <div class="selected-items">
+                            <div class="selected-item">Part B - Lever <span>×</span></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tools/Fixtures Used</label>
+                        <div class="selected-items">
+                            <div class="selected-item">Assembly Fixture <span>×</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" checked> This step includes a quality checkpoint
+                    </label>
+                    <textarea style="margin-top: 0.5rem;" placeholder="Describe the quality check...">Verify alignment pins are properly engaged and parts are flush together.</textarea>
+                </div>
+            </div>
+
+            <button class="add-button">+ Add Assembly Step</button>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="generate-button" onclick="generateSOP()">🚀 Generate Assembly SOP</button>
+
+        <!-- Preview Section -->
+        <div class="preview-panel" id="preview-panel" style="display: none;">
+            <h2 class="section-title">Generated SOP Preview</h2>
+            <div class="sop-preview">
+                <div class="sop-header">
+                    <h2>STANDARD OPERATING PROCEDURE</h2>
+                    <h3>Manual Assembly of Door Handle Mechanism</h3>
+                    <p><strong>Part Number:</strong> DH-001-A | <strong>Revision:</strong> 1.0 | <strong>Date:</strong> 2025-05-27</p>
+                </div>
+                
+                <h3>SCOPE</h3>
+                <p>This procedure describes the manual assembly process for the Door Handle Mechanism (DH-001-A) including all safety requirements and quality checkpoints.</p>
+                
+                <h3>SAFETY REQUIREMENTS</h3>
+                <p>⚠️ <strong>WARNING:</strong> Sharp edges present on Part A housing. Always wear safety glasses.<br>
+                🤏 <strong>CAUTION:</strong> Pinch points present during fixture operation. Keep fingers clear of moving parts.</p>
+                
+                <h3>REQUIRED TOOLS & MATERIALS</h3>
+                <ul>
+                    <li>Phillips Screwdriver (Size: #2)</li>
+                    <li>Assembly Fixture (ID: FIX-DH-001)</li>
+                    <li>Testing Device (ID: TEST-DH-001)</li>
+                </ul>
+                
+                <table class="sop-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Image</th>
+                            <th style="width: 60%;">Assembly Step</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="image-placeholder">
+                                    [Image Placeholder]<br>
+                                    Step 1 Assembly
+                                </div>
+                            </td>
+                            <td>
+                                <strong>Step 1:</strong> Insert Part A (housing) into Assembly Fixture FIX-DH-001. Ensure part is fully seated and fixture arms are locked.<br><br>
+                                <strong>Parts:</strong> Part A - Housing<br>
+                                <strong>Tools:</strong> Assembly Fixture
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="image-placeholder">
+                                    [Image Placeholder]<br>
+                                    Step 2 Assembly
+                                </div>
+                            </td>
+                            <td>
+                                <strong>Step 2:</strong> Place Part B (lever) on top of Part A. Align the mounting holes and ensure proper orientation using the alignment pins.<br><br>
+                                <strong>Quality Check:</strong> ✓ Verify alignment pins are properly engaged and parts are flush together.<br>
+                                <strong>Parts:</strong> Part B - Lever<br>
+                                <strong>Tools:</strong> Assembly Fixture
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addDatabaseItem(type) {
+            alert(`Add new ${type} item functionality would open a modal here`);
+        }
+        
+        function generateSOP() {
+            document.getElementById('preview-panel').style.display = 'block';
+            document.getElementById('preview-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
