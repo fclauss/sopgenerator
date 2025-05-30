@@ -1,13 +1,14 @@
 /**
  * Assembly SOP Generator - Main Application JavaScript
- * Basic functionality for Task 1 HTML structure
+ * Updated for new navigation structure with separate Database section
  */
 
 // Application state
 const app = {
     currentSection: 0,
-    totalSections: 6,
-    sections: ['basic-info', 'database', 'bom', 'tools', 'safety', 'assembly'],
+    totalSections: 5, // Updated to 5 sections: Basic Info, BOM, Safety, Assembly, Preview
+    sections: ['basic-info', 'bom', 'safety', 'assembly', 'preview-section'], // Updated section IDs
+    databaseSection: 'database', // Separate database section
     initialized: false
 };
 
@@ -79,8 +80,35 @@ function setupEventListeners() {
     }
     
     // Mobile navigation toggle
-    if (elements.navToggle) {
-        elements.navToggle.addEventListener('click', toggleMobileNav);
+    if (elements.navToggle && elements.navList) {
+        elements.navToggle.addEventListener('click', () => {
+            const isOpen = elements.navList.classList.contains('open');
+            
+            if (isOpen) {
+                elements.navList.classList.remove('open');
+                elements.navToggle.setAttribute('aria-expanded', 'false');
+            } else {
+                elements.navList.classList.add('open');
+                elements.navToggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+        
+        // Close mobile nav when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!elements.navToggle.contains(e.target) && !elements.navList.contains(e.target)) {
+                elements.navList.classList.remove('open');
+                elements.navToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
+        // Close mobile nav when pressing Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && elements.navList.classList.contains('open')) {
+                elements.navList.classList.remove('open');
+                elements.navToggle.setAttribute('aria-expanded', 'false');
+                elements.navToggle.focus();
+            }
+        });
     }
     
     // Navigation links
@@ -89,13 +117,26 @@ function setupEventListeners() {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // Check if this is the Preview link (last link in the nav)
-            if (index === navLinks.length - 1) {
-                // This is the Preview link - toggle preview panel
+            console.log(`Navigation clicked: ${link.textContent.trim()} (index: ${index})`);
+            
+            // Check if this is the Database link (first link)
+            if (link.classList.contains('nav-link-database')) {
+                console.log('Showing Database section');
+                // Show database section (separate from main flow)
+                showDatabaseSection();
+            } else if (index === navLinks.length - 1) {
+                console.log('Toggling Preview panel');
+                // This is the Preview link (last link in the nav)
                 togglePreviewPanel();
             } else {
                 // Regular section navigation
-                navigateToSection(index);
+                // Navigation structure: Database(0), Basic Info(1), BOM(2), Safety(3), Assembly(4), Preview(5)
+                // Main flow sections: Basic Info(0), BOM(1), Safety(2), Assembly(3), Preview(4)
+                const sectionIndex = index - 1; // Subtract 1 because Database is first but not in main flow
+                console.log(`Navigating to section index: ${sectionIndex} (${app.sections[sectionIndex]})`);
+                if (sectionIndex >= 0 && sectionIndex < app.totalSections) {
+                    navigateToSection(sectionIndex);
+                }
             }
         });
     });
@@ -132,12 +173,46 @@ function initializeUI() {
     updateProgress();
     updateNavigation();
     
-    // Show first section
+    // Show first section (Basic Info)
     showSection(0);
 }
 
 /**
- * Navigate between sections
+ * Show database section (separate from main flow)
+ */
+function showDatabaseSection() {
+    // Hide all main flow sections
+    app.sections.forEach((sectionId, index) => {
+        hideSection(index);
+    });
+    
+    // Show database section
+    const databaseSection = document.getElementById(app.databaseSection);
+    if (databaseSection) {
+        databaseSection.classList.add('active');
+    }
+    
+    // Hide navigation controls for database section
+    const navigationControls = document.querySelector('.navigation-controls');
+    if (navigationControls) {
+        navigationControls.style.display = 'none';
+    }
+    
+    // Hide progress bar for database section
+    const progressSection = document.querySelector('.progress-section');
+    if (progressSection) {
+        progressSection.style.display = 'none';
+    }
+    
+    // Update nav link states
+    updateNavLinkStatesForDatabase();
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * Navigate between sections in main flow
  * @param {number} direction - Direction to navigate (-1 for previous, 1 for next)
  */
 function navigateSection(direction) {
@@ -149,11 +224,28 @@ function navigateSection(direction) {
 }
 
 /**
- * Navigate to a specific section
+ * Navigate to a specific section in main flow
  * @param {number} sectionIndex - Index of the section to navigate to
  */
 function navigateToSection(sectionIndex) {
     if (sectionIndex < 0 || sectionIndex >= app.totalSections) return;
+    
+    // Hide database section if it's showing
+    const databaseSection = document.getElementById(app.databaseSection);
+    if (databaseSection) {
+        databaseSection.classList.remove('active');
+    }
+    
+    // Show navigation controls and progress bar
+    const navigationControls = document.querySelector('.navigation-controls');
+    if (navigationControls) {
+        navigationControls.style.display = 'flex';
+    }
+    
+    const progressSection = document.querySelector('.progress-section');
+    if (progressSection) {
+        progressSection.style.display = 'block';
+    }
     
     // Hide current section
     hideSection(app.currentSection);
@@ -248,13 +340,41 @@ function updateNavigation() {
 }
 
 /**
- * Update navigation link active states
+ * Update navigation link active states for main flow
  * @param {number} activeIndex - Index of the active section
  */
 function updateNavLinkStates(activeIndex) {
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach((link, index) => {
-        if (index === activeIndex) {
+        // Database link (index 0) - remove active
+        if (link.classList.contains('nav-link-database')) {
+            link.classList.remove('active');
+        }
+        // Preview link (last link) - remove active
+        else if (index === navLinks.length - 1) {
+            link.classList.remove('active');
+        }
+        // Main flow navigation links (Basic Info, BOM, Safety, Assembly)
+        else {
+            // Navigation structure: Database(0), Basic Info(1), BOM(2), Safety(3), Assembly(4), Preview(5)
+            // Main flow sections: Basic Info(0), BOM(1), Safety(2), Assembly(3), Preview(4)
+            const sectionIndex = index - 1; // Subtract 1 for database offset
+            if (sectionIndex === activeIndex) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        }
+    });
+}
+
+/**
+ * Update navigation link active states for database section
+ */
+function updateNavLinkStatesForDatabase() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach((link) => {
+        if (link.classList.contains('nav-link-database')) {
             link.classList.add('active');
         } else {
             link.classList.remove('active');
@@ -297,23 +417,6 @@ function closePreviewPanel() {
     if (elements.previewPanel) {
         elements.previewPanel.classList.remove('open');
         elements.previewToggle.setAttribute('aria-expanded', 'false');
-    }
-}
-
-/**
- * Toggle mobile navigation
- */
-function toggleMobileNav() {
-    if (elements.navList) {
-        const isOpen = elements.navList.classList.contains('open');
-        
-        if (isOpen) {
-            elements.navList.classList.remove('open');
-            elements.navToggle.setAttribute('aria-expanded', 'false');
-        } else {
-            elements.navList.classList.add('open');
-            elements.navToggle.setAttribute('aria-expanded', 'true');
-        }
     }
 }
 
@@ -397,9 +500,9 @@ function updatePreviewContent() {
             <h3>SAFETY REQUIREMENTS</h3>
             <p>⚠️ <strong>WARNING:</strong> Follow all safety guidelines during assembly.</p>
             
-            <h3>REQUIRED TOOLS & MATERIALS</h3>
+            <h3>BILL OF MATERIALS</h3>
             <ul>
-                <li>Tools will be listed here based on selections</li>
+                <li>Parts will be listed here based on BOM section</li>
             </ul>
             
             <h3>ASSEMBLY STEPS</h3>
@@ -452,6 +555,7 @@ window.addEventListener('resize', () => {
 // Export functions for potential external use
 window.SOPGenerator = {
     navigateToSection,
+    showDatabaseSection,
     togglePreviewPanel,
     showModal,
     hideModal,

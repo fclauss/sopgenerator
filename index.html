@@ -28,24 +28,28 @@
         <div class="header-container">
             <div class="logo-section">
                 <h1 class="app-title">
-                    <span class="icon" aria-hidden="true">🏭</span>
+                    <span class="icon" aria-hidden="true">🔧</span>
                     Assembly SOP Generator
                 </h1>
-                <p class="app-subtitle">Powered by Optimal AI</p>
+                <p class="app-subtitle">Streamline your Standard Operating Procedures</p>
             </div>
+            
             <nav class="header-nav" role="navigation" aria-label="Main navigation">
-                <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav">
-                    <span class="sr-only">Toggle navigation</span>
+                <button class="nav-toggle" 
+                        id="nav-toggle" 
+                        aria-expanded="false" 
+                        aria-controls="main-nav"
+                        aria-label="Toggle navigation menu">
                     <span class="hamburger"></span>
                 </button>
-                <ul class="nav-list" id="main-nav">
-                    <li><a href="#basic-info" class="nav-link">Basic Info</a></li>
-                    <li><a href="#database" class="nav-link">Database</a></li>
-                    <li><a href="#bom" class="nav-link">BOM</a></li>
-                    <li><a href="#tools" class="nav-link">Tools</a></li>
-                    <li><a href="#safety" class="nav-link">Safety</a></li>
-                    <li><a href="#assembly" class="nav-link">Assembly</a></li>
-                    <li><a href="#preview" class="nav-link">Preview</a></li>
+                
+                <ul class="nav-list" id="main-nav" role="menubar">
+                    <li role="none"><a href="#database" class="nav-link nav-link-database" role="menuitem">Database</a></li>
+                    <li role="none"><a href="#basic-info" class="nav-link" role="menuitem">Basic Info</a></li>
+                    <li role="none"><a href="#bom" class="nav-link" role="menuitem">BOM</a></li>
+                    <li role="none"><a href="#safety" class="nav-link" role="menuitem">Safety</a></li>
+                    <li role="none"><a href="#assembly" class="nav-link" role="menuitem">Assembly</a></li>
+                    <li role="none"><a href="#preview" class="nav-link" role="menuitem">Preview</a></li>
                 </ul>
             </nav>
         </div>
@@ -59,33 +63,16 @@
                 <div class="progress-bar">
                     <div class="progress-fill" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="SOP creation progress"></div>
                 </div>
-                <p class="progress-text">Step <span id="current-step">1</span> of <span id="total-steps">6</span></p>
+                <p class="progress-text">Step <span id="current-step">1</span> of <span id="total-steps">5</span></p>
             </section>
 
             <!-- Form Sections Container -->
             <div class="form-container">
-                <!-- Section 1: Basic Information -->
-                <section id="basic-info" class="form-section active" aria-labelledby="basic-info-title">
-                    <header class="section-header">
-                        <h2 id="basic-info-title" class="section-title">
-                            <span class="section-number">1</span>
-                            Basic Information
-                        </h2>
-                        <p class="section-description">Enter the fundamental details for your SOP document</p>
-                    </header>
-                    <div class="section-content">
-                        <!-- Form fields will be added in subsequent tasks -->
-                        <div class="form-placeholder">
-                            <p>Basic information form fields will be implemented in Task 6</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 2: Database Management -->
-                <section id="database" class="form-section" aria-labelledby="database-title">
+                <!-- Database Management Section (Separate from main flow) -->
+                <section id="database" class="form-section database-section" aria-labelledby="database-title">
                     <header class="section-header">
                         <h2 id="database-title" class="section-title">
-                            <span class="section-number">2</span>
+                            <span class="section-number">DB</span>
                             Manage Your Database
                         </h2>
                         <p class="section-description">Add items to your database once, reuse across multiple SOPs</p>
@@ -93,12 +80,12 @@
                     <div class="section-content">
                         <div class="database-grid">
                             <div class="database-column">
-                                <h3 class="database-title">Parts Database</h3>
-                                <div class="database-items" id="parts-database">
+                                <h3 class="database-title">Safety Database</h3>
+                                <div class="database-items" id="safety-database">
                                     <!-- Database items will be populated dynamically -->
                                 </div>
-                                <button type="button" class="add-button" data-database="parts">
-                                    <span aria-hidden="true">+</span> Add Part
+                                <button type="button" class="add-button" data-database="safety">
+                                    <span aria-hidden="true">+</span> Add Safety Item
                                 </button>
                             </div>
                             <div class="database-column">
@@ -120,17 +107,37 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="database-note">
+                            <p><strong>Note:</strong> The Database section is separate from the main SOP creation flow. Use it to manage reusable items across multiple SOPs.</p>
+                        </div>
                     </div>
                 </section>
 
-                <!-- Section 3: Bill of Materials -->
+                <!-- Section 1: Basic Information -->
+                <section id="basic-info" class="form-section active" aria-labelledby="basic-info-title">
+                    <header class="section-header">
+                        <h2 id="basic-info-title" class="section-title">
+                            <span class="section-number">1</span>
+                            Basic Information
+                        </h2>
+                        <p class="section-description">Enter the fundamental details for your SOP document</p>
+                    </header>
+                    <div class="section-content">
+                        <!-- Form fields will be added in subsequent tasks -->
+                        <div class="form-placeholder">
+                            <p>Basic information form fields will be implemented in Task 6</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: Bill of Materials -->
                 <section id="bom" class="form-section" aria-labelledby="bom-title">
                     <header class="section-header">
                         <h2 id="bom-title" class="section-title">
-                            <span class="section-number">3</span>
+                            <span class="section-number">2</span>
                             Bill of Materials
                         </h2>
-                        <p class="section-description">Select parts from your database for this assembly</p>
+                        <p class="section-description">Define all parts and components needed for this assembly</p>
                     </header>
                     <div class="section-content">
                         <div class="bom-container" id="bom-container">
@@ -142,62 +149,49 @@
                     </div>
                 </section>
 
-                <!-- Section 4: Required Tools & Equipment -->
-                <section id="tools" class="form-section" aria-labelledby="tools-title">
-                    <header class="section-header">
-                        <h2 id="tools-title" class="section-title">
-                            <span class="section-number">4</span>
-                            Required Tools & Equipment
-                        </h2>
-                        <p class="section-description">Select tools and fixtures needed for this assembly</p>
-                    </header>
-                    <div class="section-content">
-                        <div class="selected-tools" id="selected-tools">
-                            <!-- Selected tools will be displayed here -->
-                        </div>
-                        <div class="tool-selection">
-                            <label for="tool-selector" class="sr-only">Select tool to add</label>
-                            <select id="tool-selector" class="tool-selector">
-                                <option value="">Select tool to add...</option>
-                                <!-- Options will be populated from database -->
-                            </select>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 5: Safety Requirements -->
+                <!-- Section 3: Safety Requirements -->
                 <section id="safety" class="form-section" aria-labelledby="safety-title">
                     <header class="section-header">
                         <h2 id="safety-title" class="section-title">
-                            <span class="section-number">5</span>
+                            <span class="section-number">3</span>
                             Safety Requirements
                         </h2>
-                        <p class="section-description">Define safety precautions and requirements</p>
+                        <p class="section-description">Define general safety precautions and requirements for this SOP</p>
                     </header>
                     <div class="section-content">
                         <div class="safety-grid">
                             <!-- Safety pictograms will be added here -->
                         </div>
                         <div class="safety-notes">
-                            <label for="safety-notes-textarea" class="form-label">Additional Safety Notes</label>
+                            <label for="safety-notes-textarea" class="form-label">General Safety Notes</label>
                             <textarea 
                                 id="safety-notes-textarea" 
                                 class="form-textarea" 
-                                placeholder="Describe specific safety precautions for this assembly process..."
+                                placeholder="Describe general safety precautions for this assembly process..."
                                 rows="4"
                             ></textarea>
+                        </div>
+                        <div class="safety-selection">
+                            <label for="safety-selector" class="form-label">Add Safety Items from Database</label>
+                            <select id="safety-selector" class="tool-selector">
+                                <option value="">Select safety item to add...</option>
+                                <!-- Options will be populated from safety database -->
+                            </select>
+                        </div>
+                        <div class="selected-safety" id="selected-safety">
+                            <!-- Selected safety items will be displayed here -->
                         </div>
                     </div>
                 </section>
 
-                <!-- Section 6: Assembly Sequence -->
+                <!-- Section 4: Assembly Sequence -->
                 <section id="assembly" class="form-section" aria-labelledby="assembly-title">
                     <header class="section-header">
                         <h2 id="assembly-title" class="section-title">
-                            <span class="section-number">6</span>
+                            <span class="section-number">4</span>
                             Assembly Sequence
                         </h2>
-                        <p class="section-description">Document the step-by-step assembly process</p>
+                        <p class="section-description">Document the step-by-step assembly process with tools, fixtures, parts, and safety for each step</p>
                     </header>
                     <div class="section-content">
                         <div class="assembly-steps" id="assembly-steps">
@@ -208,63 +202,68 @@
                         </button>
                     </div>
                 </section>
+
+                <!-- Section 5: Preview (Final step) -->
+                <section id="preview-section" class="form-section" aria-labelledby="preview-section-title">
+                    <header class="section-header">
+                        <h2 id="preview-section-title" class="section-title">
+                            <span class="section-number">5</span>
+                            Preview & Generate
+                        </h2>
+                        <p class="section-description">Review your SOP and generate the final document</p>
+                    </header>
+                    <div class="section-content">
+                        <div class="preview-summary">
+                            <p>Review all sections and click "Generate SOP" to create your final document.</p>
+                        </div>
+                    </div>
+                </section>
             </div>
 
             <!-- Navigation Controls -->
-            <nav class="section-navigation" aria-label="Section navigation">
-                <button type="button" class="nav-button nav-button--previous" id="prev-section" disabled>
-                    <span aria-hidden="true">←</span> Previous
+            <div class="navigation-controls">
+                <button class="nav-button" id="prev-section" disabled>
+                    <span aria-hidden="true">←</span>
+                    Previous
                 </button>
-                <button type="button" class="nav-button nav-button--next" id="next-section">
-                    Next <span aria-hidden="true">→</span>
+                
+                <button class="generate-button" id="generate-sop">
+                    <span aria-hidden="true">📄</span>
+                    Generate SOP
                 </button>
-                <button type="button" class="generate-button" id="generate-sop" style="display: none;">
-                    <span aria-hidden="true">🚀</span> Generate Assembly SOP
+                
+                <button class="nav-button" id="next-section">
+                    Next
+                    <span aria-hidden="true">→</span>
                 </button>
-            </nav>
+            </div>
         </div>
     </main>
 
     <!-- Preview Panel -->
-    <aside class="preview-panel" id="preview-panel" role="complementary" aria-labelledby="preview-title">
+    <aside class="preview-panel" id="preview-panel" role="complementary" aria-label="SOP Preview">
         <header class="preview-header">
-            <h2 id="preview-title" class="preview-title">SOP Preview</h2>
-            <button type="button" class="preview-toggle" id="preview-toggle" aria-expanded="false">
-                <span class="sr-only">Toggle preview panel</span>
-                <span class="toggle-icon" aria-hidden="true">👁️</span>
+            <h2 class="preview-title">SOP Preview</h2>
+            <button class="close-preview" 
+                    id="preview-toggle" 
+                    aria-label="Close preview panel"
+                    aria-expanded="false">
+                <span aria-hidden="true">×</span>
             </button>
         </header>
+        
         <div class="preview-content" id="preview-content">
-            <div class="sop-preview">
-                <div class="sop-header">
-                    <h3>STANDARD OPERATING PROCEDURE</h3>
-                    <h4 id="preview-sop-title">Assembly SOP</h4>
-                    <div class="sop-meta">
-                        <span id="preview-part-number">Part Number: TBD</span>
-                        <span id="preview-revision">Revision: TBD</span>
-                        <span id="preview-date">Date: <span class="current-date"></span></span>
-                    </div>
-                </div>
-                <div class="sop-content" id="preview-sop-content">
-                    <p class="preview-placeholder">Complete the form sections to see your SOP preview here.</p>
-                </div>
+            <div class="preview-placeholder">
+                <p>Your SOP preview will appear here as you complete each section.</p>
+                <p>Click "Generate SOP" to create the final document.</p>
             </div>
         </div>
     </aside>
 
     <!-- Footer -->
     <footer class="footer" role="contentinfo">
-        <div class="footer-container">
-            <div class="footer-content">
-                <p class="footer-text">
-                    &copy; 2025 Optimal AI. Assembly SOP Generator v1.0
-                </p>
-                <div class="footer-links">
-                    <a href="#" class="footer-link">Help</a>
-                    <a href="#" class="footer-link">Documentation</a>
-                    <a href="#" class="footer-link">Support</a>
-                </div>
-            </div>
+        <div class="footer-content">
+            <p>&copy; 2024 Optimal AI. Assembly SOP Generator - <span class="current-date"></span></p>
         </div>
     </footer>
 
