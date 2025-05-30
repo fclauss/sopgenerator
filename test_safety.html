@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Functionality Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .safety-item { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .selected-safety-item { margin: 5px 0; padding: 8px; background: #e8f5e8; border: 1px solid #4CAF50; }
+        .remove-safety-btn { background: #ff4444; color: white; border: none; padding: 2px 6px; margin-left: 10px; cursor: pointer; }
+        .safety-empty { color: #666; font-style: italic; }
+        select { padding: 5px; margin: 10px 0; }
+        button { padding: 8px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Safety Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Generate Test Data</h2>
+        <button onclick="generateTestData()">Generate Mock Safety Data</button>
+        <div id="test-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Safety Database</h2>
+        <div id="safety-database">
+            <!-- Safety items will be displayed here -->
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Safety Selector</h2>
+        <label for="safety-selector">Add Safety Items from Database:</label>
+        <select id="safety-selector">
+            <option value="">Select safety item to add...</option>
+        </select>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Selected Safety Items</h2>
+        <div id="selected-safety">
+            <!-- Selected safety items will be displayed here -->
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+    <script>
+        // Test function to generate mock data and verify functionality
+        function generateTestData() {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.innerHTML = 'Generating test data...';
+            
+            try {
+                // Generate mock data
+                window.SOPGenerator.mockData.generateAll();
+                statusDiv.innerHTML = '✅ Test data generated successfully!';
+                
+                // Update displays
+                setTimeout(() => {
+                    updateDatabaseDisplay();
+                    statusDiv.innerHTML += '<br>✅ Database displays updated!';
+                }, 100);
+                
+            } catch (error) {
+                statusDiv.innerHTML = '❌ Error generating test data: ' + error.message;
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded');
+            
+            // Initialize the app
+            if (typeof initializeApp === 'function') {
+                // The app should auto-initialize, but let's make sure displays are updated
+                setTimeout(() => {
+                    if (typeof updateDatabaseDisplay === 'function') {
+                        updateDatabaseDisplay();
+                    }
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -110,6 +110,23 @@
                         <div class="database-note">
                             <p><strong>Note:</strong> The Database section is separate from the main SOP creation flow. Use it to manage reusable items across multiple SOPs.</p>
                         </div>
+                        
+                        <!-- Mock Data Generation Controls -->
+                        <div class="mock-data-controls">
+                            <h3 class="database-title">🎭 Test Data Generation</h3>
+                            <p class="mock-data-description">Generate realistic test data to explore the application functionality</p>
+                            <div class="mock-data-buttons">
+                                <button type="button" class="button button--primary" id="generate-full-mock-data">
+                                    <span aria-hidden="true">🎯</span> Generate Full Test Data
+                                </button>
+                                <button type="button" class="button button--danger" id="clear-all-data">
+                                    <span aria-hidden="true">🗑️</span> Clear All Data
+                                </button>
+                            </div>
+                            <div class="storage-info" id="storage-info">
+                                <!-- Storage information will be displayed here -->
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -140,6 +157,16 @@
                         <p class="section-description">Define all parts and components needed for this assembly</p>
                     </header>
                     <div class="section-content">
+                        <div class="database-column">
+                            <h3 class="database-title">Available Parts</h3>
+                            <div class="database-items" id="parts-database">
+                                <!-- Parts from database will be displayed here -->
+                            </div>
+                            <button type="button" class="add-button" data-database="parts">
+                                <span aria-hidden="true">+</span> Add New Part
+                            </button>
+                        </div>
+                        
                         <div class="bom-container" id="bom-container">
                             <!-- BOM items will be added dynamically -->
                         </div>
