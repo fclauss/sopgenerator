@@ -28,85 +28,56 @@ The Assembly SOP Generator solves the problem of time-consuming, manual SOP crea
 - **Storage**: Local Storage API for data persistence
 - **Fonts**: Google Fonts (Roboto)
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 sopgenerator/
-├── index.html              # Main application file
+├── index.html              # Main application HTML
 ├── css/
-│   └── styles.css          # Application styles
+│   └── styles.css          # Enhanced CSS with Optimal AI branding
 ├── js/
-│   └── app.js             # Application JavaScript
-├── scripts/
-│   ├── prd.txt            # Product Requirements Document
-│   └── example_prd.txt    # Example PRD template
-├── tasks/
-│   └── tasks.json         # TaskMaster AI task definitions
-├── .taskmasterconfig      # TaskMaster AI configuration
-└── README.md              # This file
+│   └── app.js              # Application JavaScript with navigation
+├── tasks/                  # TaskMaster AI task management
+├── scripts/                # Project scripts and documentation
+├── README.md               # This file
+├── OPEN_ISSUES.md          # Non-critical issues and enhancement tracking
+└── .taskmasterconfig       # TaskMaster AI configuration
 ```
 
-## Getting Started
+## 🚀 Getting Started
 
-### Prerequisites
-- Modern web browser (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
-- Web server (for local development) or static hosting service
-
-### Installation
-
-1. Clone the repository:
+1. **Clone the repository**
    ```bash
    git clone https://github.com/fclauss/sopgenerator.git
    cd sopgenerator
    ```
 
-2. Serve the files using a local web server:
+2. **Start the development server**
    ```bash
-   # Using Python 3
-   python -m http.server 8000
-   
-   # Using Node.js (if you have http-server installed)
-   npx http-server
-   
-   # Using PHP
-   php -S localhost:8000
+   python3 -m http.server 8000
    ```
 
-3. Open your browser and navigate to `http://localhost:8000`
+3. **Open your browser**
+   Navigate to `http://localhost:8000`
 
-### Usage
+## 🔧 Development Workflow
 
-1. **Database Setup**: Start by adding parts, tools, and fixtures to their respective databases
-2. **SOP Creation**: Navigate through the form sections:
-   - Basic Information
-   - Database Management
-   - Bill of Materials (BOM)
-   - Required Tools & Equipment
-   - Safety Requirements
-   - Assembly Sequence
-3. **Preview & Generate**: Use the preview panel to see your SOP in real-time
-4. **Export**: Generate the final SOP document
+### Issue Tracking
+- **Critical Issues**: Report immediately and address in current sprint
+- **Non-Critical Issues**: Add to [`OPEN_ISSUES.md`](./OPEN_ISSUES.md) for future iterations
+- **Enhancements**: Document in issue list with priority levels
 
-## Development
+### Task Management
+This project uses TaskMaster AI for task management:
+- View tasks: Check the `tasks/` directory
+- Current progress: See task status in TaskMaster
+- Next steps: Follow the task dependencies and priorities
 
-This project is managed using TaskMaster AI for structured development. The current implementation includes:
-
-### Completed Tasks
-- ✅ **Task 1**: HTML Structure and Layout - Complete semantic HTML5 structure with accessibility features
-
-### Upcoming Tasks
-- **Task 2**: CSS Styling and Responsive Design
-- **Task 3**: Data Models and State Management
-- **Task 4**: Local Storage Persistence
-- **Task 5**: Database Management Interface
-- And more...
-
-### Development Workflow
-
-The project follows a structured development approach:
-1. Each task is implemented following the TaskMaster AI workflow
-2. Code is committed to GitHub after task completion and approval
-3. Progressive enhancement ensures the application remains functional at each stage
+### Code Standards
+- **Professional UI/UX**: Follow Optimal AI brand guidelines
+- **Accessibility**: Maintain ARIA labels and keyboard navigation
+- **Responsive Design**: Ensure functionality across all device sizes
+- **Clean Code**: Use semantic HTML, organized CSS, and documented JavaScript
 
 ## Browser Support
 
