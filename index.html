@@ -140,10 +140,125 @@
                         <p class="section-description">Enter the fundamental details for your SOP document</p>
                     </header>
                     <div class="section-content">
-                        <!-- Form fields will be added in subsequent tasks -->
-                        <div class="form-placeholder">
-                            <p>Basic information form fields will be implemented in Task 6</p>
-                        </div>
+                        <form class="basic-info-form" id="basic-info-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="sop-title" class="form-label required">SOP Title</label>
+                                    <input 
+                                        type="text" 
+                                        id="sop-title" 
+                                        name="title"
+                                        class="form-input" 
+                                        placeholder="Enter the SOP title (e.g., 'Widget Assembly Process')"
+                                        required
+                                        aria-describedby="sop-title-help"
+                                    >
+                                    <small id="sop-title-help" class="form-help">A clear, descriptive title for this Standard Operating Procedure</small>
+                                    <div class="form-error" id="sop-title-error" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="part-number" class="form-label required">Part Number</label>
+                                    <input 
+                                        type="text" 
+                                        id="part-number" 
+                                        name="partNumber"
+                                        class="form-input" 
+                                        placeholder="Enter part number (e.g., 'WDG-001-A')"
+                                        required
+                                        aria-describedby="part-number-help"
+                                    >
+                                    <small id="part-number-help" class="form-help">Unique identifier for the part or assembly</small>
+                                    <div class="form-error" id="part-number-error" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="revision" class="form-label">Revision</label>
+                                    <input 
+                                        type="text" 
+                                        id="revision" 
+                                        name="revision"
+                                        class="form-input" 
+                                        placeholder="A"
+                                        value="A"
+                                        maxlength="10"
+                                        aria-describedby="revision-help"
+                                    >
+                                    <small id="revision-help" class="form-help">Document revision level (e.g., A, B, C or 1.0, 1.1)</small>
+                                    <div class="form-error" id="revision-error" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="author" class="form-label required">Author</label>
+                                    <input 
+                                        type="text" 
+                                        id="author" 
+                                        name="author"
+                                        class="form-input" 
+                                        placeholder="Enter author name"
+                                        required
+                                        aria-describedby="author-help"
+                                    >
+                                    <small id="author-help" class="form-help">Person responsible for creating this SOP</small>
+                                    <div class="form-error" id="author-error" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="department" class="form-label">Department</label>
+                                    <input 
+                                        type="text" 
+                                        id="department" 
+                                        name="department"
+                                        class="form-input" 
+                                        placeholder="Enter department (e.g., 'Manufacturing', 'Assembly')"
+                                        aria-describedby="department-help"
+                                    >
+                                    <small id="department-help" class="form-help">Department or team responsible for this process</small>
+                                    <div class="form-error" id="department-error" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="approver" class="form-label">Approver</label>
+                                    <input 
+                                        type="text" 
+                                        id="approver" 
+                                        name="approver"
+                                        class="form-input" 
+                                        placeholder="Enter approver name"
+                                        aria-describedby="approver-help"
+                                    >
+                                    <small id="approver-help" class="form-help">Person who approved this SOP for use</small>
+                                    <div class="form-error" id="approver-error" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="effective-date" class="form-label">Effective Date</label>
+                                    <input 
+                                        type="date" 
+                                        id="effective-date" 
+                                        name="effectiveDate"
+                                        class="form-input" 
+                                        aria-describedby="effective-date-help"
+                                    >
+                                    <small id="effective-date-help" class="form-help">Date when this SOP becomes effective</small>
+                                    <div class="form-error" id="effective-date-error" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-group form-group--full">
+                                    <label for="notes" class="form-label">General Notes</label>
+                                    <textarea 
+                                        id="notes" 
+                                        name="notes"
+                                        class="form-textarea" 
+                                        placeholder="Enter any general notes, special instructions, or additional information about this SOP..."
+                                        rows="4"
+                                        aria-describedby="notes-help"
+                                    ></textarea>
+                                    <small id="notes-help" class="form-help">Optional notes or special instructions for this SOP</small>
+                                    <div class="form-error" id="notes-error" aria-live="polite"></div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </section>
 

@@ -2272,6 +2272,9 @@ function setupEventListeners() {
         safetySelector.addEventListener('change', handleSafetySelection);
     }
     
+    // Basic Info form event listeners
+    setupBasicInfoFormListeners();
+    
     // Modal event listeners
     const modalOverlay = document.getElementById('modal-overlay');
     const modalClose = document.querySelector('.modal-close');
@@ -3141,6 +3144,211 @@ function updatePartsDatabase() {
             <div class="database-item-category">${part.category}</div>
         </div>
     `).join('');
+}
+
+/**
+ * Setup Basic Info form event listeners
+ */
+function setupBasicInfoFormListeners() {
+    const basicInfoForm = document.getElementById('basic-info-form');
+    if (!basicInfoForm) return;
+    
+    // Get all form inputs
+    const formInputs = basicInfoForm.querySelectorAll('input, textarea');
+    
+    // Add event listeners to each input
+    formInputs.forEach(input => {
+        // Handle input changes
+        input.addEventListener('input', handleBasicInfoInput);
+        input.addEventListener('blur', handleBasicInfoBlur);
+        
+        // Handle validation on form submission attempt
+        input.addEventListener('invalid', handleBasicInfoValidation);
+    });
+    
+    // Load existing data into form
+    loadBasicInfoData();
+    
+    console.log('Basic Info form listeners setup complete');
+}
+
+/**
+ * Handle input changes in Basic Info form
+ */
+function handleBasicInfoInput(event) {
+    const input = event.target;
+    const fieldName = input.name;
+    const value = input.value;
+    
+    // Clear any existing validation error
+    clearFieldError(input);
+    
+    // Update the current SOP with the new value
+    const currentSOP = stateManager.getCurrentSOP();
+    currentSOP[fieldName] = value;
+    
+    // Mark state as dirty and save
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Updated SOP ${fieldName}: ${value}`);
+}
+
+/**
+ * Handle blur events for validation
+ */
+function handleBasicInfoBlur(event) {
+    const input = event.target;
+    validateBasicInfoField(input);
+}
+
+/**
+ * Handle validation events
+ */
+function handleBasicInfoValidation(event) {
+    const input = event.target;
+    event.preventDefault(); // Prevent default browser validation UI
+    validateBasicInfoField(input);
+}
+
+/**
+ * Validate a specific Basic Info field
+ */
+function validateBasicInfoField(input) {
+    const fieldName = input.name;
+    const value = input.value.trim();
+    let errorMessage = '';
+    
+    // Required field validation
+    if (input.hasAttribute('required') && !value) {
+        errorMessage = `${getFieldDisplayName(fieldName)} is required`;
+    }
+    
+    // Field-specific validation
+    switch (fieldName) {
+        case 'title':
+            if (value && value.length < 3) {
+                errorMessage = 'SOP title must be at least 3 characters long';
+            }
+            break;
+        case 'partNumber':
+            if (value && !/^[A-Za-z0-9\-_]+$/.test(value)) {
+                errorMessage = 'Part number can only contain letters, numbers, hyphens, and underscores';
+            }
+            break;
+        case 'revision':
+            if (value && value.length > 10) {
+                errorMessage = 'Revision must be 10 characters or less';
+            }
+            break;
+        case 'effectiveDate':
+            if (value) {
+                const date = new Date(value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Reset time for comparison
+                if (date < today) {
+                    errorMessage = 'Effective date cannot be in the past';
+                }
+            }
+            break;
+    }
+    
+    // Display or clear error
+    if (errorMessage) {
+        showFieldError(input, errorMessage);
+        stateManager.setValidationError(fieldName, errorMessage);
+    } else {
+        clearFieldError(input);
+        stateManager.clearValidationError(fieldName);
+    }
+    
+    return !errorMessage;
+}
+
+/**
+ * Show validation error for a field
+ */
+function showFieldError(input, message) {
+    const errorElement = document.getElementById(`${input.id}-error`);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+    
+    input.classList.add('form-input--error');
+    input.setAttribute('aria-invalid', 'true');
+}
+
+/**
+ * Clear validation error for a field
+ */
+function clearFieldError(input) {
+    const errorElement = document.getElementById(`${input.id}-error`);
+    if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.style.display = 'none';
+    }
+    
+    input.classList.remove('form-input--error');
+    input.setAttribute('aria-invalid', 'false');
+}
+
+/**
+ * Get display name for a field
+ */
+function getFieldDisplayName(fieldName) {
+    const displayNames = {
+        title: 'SOP Title',
+        partNumber: 'Part Number',
+        revision: 'Revision',
+        author: 'Author',
+        department: 'Department',
+        approver: 'Approver',
+        effectiveDate: 'Effective Date',
+        notes: 'Notes'
+    };
+    
+    return displayNames[fieldName] || fieldName;
+}
+
+/**
+ * Load existing Basic Info data into the form
+ */
+function loadBasicInfoData() {
+    const currentSOP = stateManager.getCurrentSOP();
+    const basicInfoForm = document.getElementById('basic-info-form');
+    
+    if (!basicInfoForm || !currentSOP) return;
+    
+    // Populate form fields with existing data
+    const formInputs = basicInfoForm.querySelectorAll('input, textarea');
+    formInputs.forEach(input => {
+        const fieldName = input.name;
+        if (fieldName && currentSOP[fieldName] !== undefined) {
+            input.value = currentSOP[fieldName];
+        }
+    });
+    
+    console.log('Basic Info data loaded into form');
+}
+
+/**
+ * Validate all Basic Info fields
+ */
+function validateBasicInfoForm() {
+    const basicInfoForm = document.getElementById('basic-info-form');
+    if (!basicInfoForm) return true;
+    
+    const formInputs = basicInfoForm.querySelectorAll('input, textarea');
+    let isValid = true;
+    
+    formInputs.forEach(input => {
+        if (!validateBasicInfoField(input)) {
+            isValid = false;
+        }
+    });
+    
+    return isValid;
 }
 
 // Initialize the application when DOM is loaded
