@@ -175,6 +175,7 @@ class AssemblyStep {
         this.parts = data.parts || []; // Array of part IDs with quantities
         this.tools = data.tools || []; // Array of tool IDs
         this.fixtures = data.fixtures || []; // Array of fixture IDs
+        this.safety = data.safety || []; // Array of safety requirements
         this.qualityCheck = data.qualityCheck || false;
         this.qualityDescription = data.qualityDescription || '';
         this.notes = data.notes || '';
@@ -255,6 +256,7 @@ class AssemblyStep {
             parts: this.parts,
             tools: this.tools,
             fixtures: this.fixtures,
+            safety: this.safety,
             qualityCheck: this.qualityCheck,
             qualityDescription: this.qualityDescription,
             notes: this.notes,
@@ -2278,6 +2280,9 @@ function setupEventListeners() {
     // BOM form event listeners
     setupBOMFormListeners();
     
+    // Assembly form event listeners
+    setupAssemblyFormListeners();
+    
     // Modal event listeners
     const modalOverlay = document.getElementById('modal-overlay');
     const modalClose = document.querySelector('.modal-close');
@@ -2463,6 +2468,11 @@ function showSection(sectionIndex) {
         if (sectionIndex === 1) { // BOM section
             updatePartsDatabase();
             updateBOMDisplay();
+        }
+        
+        // Update assembly display when Assembly section is shown
+        if (sectionIndex === 3) { // Assembly section
+            updateAssemblyDisplay();
         }
     }
 }
@@ -3762,6 +3772,607 @@ function validateBOMForm() {
     }
     
     stateManager.clearValidationError('bom');
+    return true;
+}
+
+/**
+ * Setup Assembly form event listeners and functionality
+ */
+function setupAssemblyFormListeners() {
+    // Setup add assembly step button
+    const addStepButton = document.getElementById('add-assembly-step');
+    if (addStepButton) {
+        addStepButton.addEventListener('click', handleAddAssemblyStep);
+    }
+    
+    // Load existing assembly data
+    loadAssemblyData();
+    
+    console.log('Assembly form listeners setup complete');
+}
+
+/**
+ * Handle adding a new assembly step
+ */
+function handleAddAssemblyStep() {
+    showAddAssemblyStepModal();
+}
+
+/**
+ * Add a new assembly step to the current SOP
+ */
+function addAssemblyStep(stepData) {
+    const currentSOP = stateManager.getCurrentSOP();
+    
+    // Create step with proper step number
+    const stepNumber = currentSOP.steps.length + 1;
+    const newStepData = {
+        ...stepData,
+        stepNumber: stepNumber
+    };
+    
+    const newStep = currentSOP.addStep(newStepData);
+    
+    // Update UI and save
+    updateAssemblyDisplay();
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Added assembly step ${stepNumber}: ${stepData.description}`);
+    return newStep;
+}
+
+/**
+ * Remove an assembly step from the current SOP
+ */
+function removeAssemblyStep(stepId) {
+    const currentSOP = stateManager.getCurrentSOP();
+    const step = currentSOP.steps.find(s => s.id === stepId);
+    
+    if (!step) return;
+    
+    currentSOP.removeStep(stepId);
+    
+    // Update UI and save
+    updateAssemblyDisplay();
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Removed assembly step: ${step.description}`);
+}
+
+/**
+ * Update an assembly step
+ */
+function updateAssemblyStep(stepId, updates) {
+    const currentSOP = stateManager.getCurrentSOP();
+    const step = currentSOP.steps.find(s => s.id === stepId);
+    
+    if (!step) return;
+    
+    step.update(updates);
+    
+    // Update UI and save
+    updateAssemblyDisplay();
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Updated assembly step: ${step.description}`);
+}
+
+/**
+ * Move assembly step up or down
+ */
+function moveAssemblyStep(stepId, direction) {
+    const currentSOP = stateManager.getCurrentSOP();
+    const stepIndex = currentSOP.steps.findIndex(s => s.id === stepId);
+    
+    if (stepIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? stepIndex - 1 : stepIndex + 1;
+    
+    if (newIndex < 0 || newIndex >= currentSOP.steps.length) return;
+    
+    // Swap steps
+    [currentSOP.steps[stepIndex], currentSOP.steps[newIndex]] = 
+    [currentSOP.steps[newIndex], currentSOP.steps[stepIndex]];
+    
+    // Reorder step numbers
+    currentSOP.reorderSteps();
+    
+    // Update UI and save
+    updateAssemblyDisplay();
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Moved assembly step ${direction}`);
+}
+
+/**
+ * Update the assembly steps display
+ */
+function updateAssemblyDisplay() {
+    const assemblyContainer = document.getElementById('assembly-steps');
+    if (!assemblyContainer) return;
+    
+    const currentSOP = stateManager.getCurrentSOP();
+    const steps = currentSOP.steps || [];
+    
+    if (steps.length === 0) {
+        assemblyContainer.innerHTML = `
+            <div class="assembly-empty">
+                <p>No assembly steps defined yet</p>
+                <p class="assembly-help">Click "Add Assembly Step" to start documenting your assembly process</p>
+            </div>
+        `;
+        return;
+    }
+    
+    assemblyContainer.innerHTML = steps.map((step, index) => {
+        const parts = step.parts.map(partRef => {
+            const part = stateManager.getPart(partRef.partId);
+            return part ? part.name : 'Unknown part';
+        }).join(', ');
+        
+        const tools = step.tools.map(toolId => {
+            const tool = stateManager.getTool(toolId);
+            return tool ? tool.name : 'Unknown tool';
+        }).join(', ');
+        
+        const fixtures = step.fixtures.map(fixtureId => {
+            const fixture = stateManager.getFixture(fixtureId);
+            return fixture ? fixture.name : 'Unknown fixture';
+        }).join(', ');
+        
+        const safety = step.safety ? step.safety.join(', ') : '';
+        
+        return `
+            <div class="assembly-step" data-step-id="${step.id}">
+                <div class="assembly-step-header">
+                    <div class="assembly-step-number">Step ${step.stepNumber}</div>
+                    <div class="assembly-step-controls">
+                        <button type="button" class="step-control-btn" onclick="moveAssemblyStep('${step.id}', 'up')" 
+                                ${index === 0 ? 'disabled' : ''} aria-label="Move step up">
+                            <span aria-hidden="true">↑</span>
+                        </button>
+                        <button type="button" class="step-control-btn" onclick="moveAssemblyStep('${step.id}', 'down')" 
+                                ${index === steps.length - 1 ? 'disabled' : ''} aria-label="Move step down">
+                            <span aria-hidden="true">↓</span>
+                        </button>
+                        <button type="button" class="step-control-btn step-edit-btn" onclick="editAssemblyStep('${step.id}')" aria-label="Edit step">
+                            <span aria-hidden="true">✏️</span>
+                        </button>
+                        <button type="button" class="step-control-btn step-remove-btn" onclick="removeAssemblyStep('${step.id}')" aria-label="Remove step">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="assembly-step-body">
+                    <div class="assembly-step-image">
+                        <div class="image-placeholder">
+                            <span class="image-placeholder-icon">📷</span>
+                            <span class="image-placeholder-text">Step Image</span>
+                        </div>
+                    </div>
+                    
+                    <div class="assembly-step-content">
+                        <div class="assembly-step-description">
+                            <strong>Description:</strong> ${step.description}
+                        </div>
+                        
+                        ${step.parts.length > 0 ? `
+                            <div class="assembly-step-parts">
+                                <strong>Parts:</strong> ${parts}
+                            </div>
+                        ` : ''}
+                        
+                        ${step.tools.length > 0 ? `
+                            <div class="assembly-step-tools">
+                                <strong>Tools:</strong> ${tools}
+                            </div>
+                        ` : ''}
+                        
+                        ${step.fixtures.length > 0 ? `
+                            <div class="assembly-step-fixtures">
+                                <strong>Fixtures:</strong> ${fixtures}
+                            </div>
+                        ` : ''}
+                        
+                        ${safety ? `
+                            <div class="assembly-step-safety">
+                                <strong>Safety:</strong> ${safety}
+                            </div>
+                        ` : ''}
+                        
+                        ${step.estimatedTime > 0 ? `
+                            <div class="assembly-step-time">
+                                <strong>Estimated Time:</strong> ${step.estimatedTime} minutes
+                            </div>
+                        ` : ''}
+                        
+                        ${step.qualityCheck ? `
+                            <div class="assembly-step-quality">
+                                <strong>Quality Check:</strong> ${step.qualityDescription || 'Required'}
+                            </div>
+                        ` : ''}
+                        
+                        ${step.notes ? `
+                            <div class="assembly-step-notes">
+                                <strong>Notes:</strong> ${step.notes}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Load existing assembly data into the display
+ */
+function loadAssemblyData() {
+    updateAssemblyDisplay();
+}
+
+/**
+ * Show modal for adding assembly step
+ */
+function showAddAssemblyStepModal() {
+    const parts = stateManager.getAllParts();
+    const tools = stateManager.getAllTools();
+    const fixtures = stateManager.getAllFixtures();
+    const safetyItems = stateManager.getAllSafety();
+    
+    const partOptions = parts.map(part => 
+        `<option value="${part.id}">${part.name} (${part.partNumber})</option>`
+    ).join('');
+    
+    const toolOptions = tools.map(tool => 
+        `<option value="${tool.id}">${tool.name} (${tool.identifier})</option>`
+    ).join('');
+    
+    const fixtureOptions = fixtures.map(fixture => 
+        `<option value="${fixture.id}">${fixture.name} (${fixture.identifier})</option>`
+    ).join('');
+    
+    const safetyOptions = safetyItems.map(safety => 
+        `<option value="${safety.id}">${safety.name} (${safety.identifier})</option>`
+    ).join('');
+    
+    const modalContent = `
+        <div class="assembly-step-modal-form">
+            <div class="form-group">
+                <label for="modal-step-description" class="form-label required">Step Description</label>
+                <textarea 
+                    id="modal-step-description" 
+                    class="form-textarea" 
+                    placeholder="Describe what needs to be done in this step..."
+                    rows="3"
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="modal-step-parts" class="form-label">Parts Used</label>
+                <select id="modal-step-parts" class="form-select" multiple>
+                    ${partOptions}
+                </select>
+                <small class="form-help">Hold Ctrl/Cmd to select multiple parts</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="modal-step-tools" class="form-label">Tools Required</label>
+                <select id="modal-step-tools" class="form-select" multiple>
+                    ${toolOptions}
+                </select>
+                <small class="form-help">Hold Ctrl/Cmd to select multiple tools</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="modal-step-fixtures" class="form-label">Fixtures Required</label>
+                <select id="modal-step-fixtures" class="form-select" multiple>
+                    ${fixtureOptions}
+                </select>
+                <small class="form-help">Hold Ctrl/Cmd to select multiple fixtures</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="modal-step-safety" class="form-label">Safety Requirements</label>
+                <select id="modal-step-safety" class="form-select" multiple>
+                    ${safetyOptions}
+                </select>
+                <small class="form-help">Hold Ctrl/Cmd to select multiple safety items</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="modal-step-safety-text" class="form-label">Additional Safety Notes</label>
+                <textarea 
+                    id="modal-step-safety-text" 
+                    class="form-textarea" 
+                    placeholder="Add any additional safety requirements as free text..."
+                    rows="2"
+                ></textarea>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="modal-step-time" class="form-label">Estimated Time (minutes)</label>
+                    <input 
+                        type="number" 
+                        id="modal-step-time" 
+                        class="form-input" 
+                        min="0" 
+                        max="999"
+                        placeholder="0"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="modal-step-quality" class="form-checkbox">
+                        Quality Check Required
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group" id="quality-description-group" style="display: none;">
+                <label for="modal-step-quality-desc" class="form-label">Quality Check Description</label>
+                <textarea 
+                    id="modal-step-quality-desc" 
+                    class="form-textarea" 
+                    placeholder="Describe the quality check requirements..."
+                    rows="2"
+                ></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="modal-step-notes" class="form-label">Additional Notes</label>
+                <textarea 
+                    id="modal-step-notes" 
+                    class="form-textarea" 
+                    placeholder="Any additional notes or special instructions..."
+                    rows="2"
+                ></textarea>
+            </div>
+        </div>
+    `;
+    
+    showModal('Add Assembly Step', modalContent, true);
+    
+    // Setup quality check toggle
+    const qualityCheckbox = document.getElementById('modal-step-quality');
+    const qualityDescGroup = document.getElementById('quality-description-group');
+    
+    if (qualityCheckbox && qualityDescGroup) {
+        qualityCheckbox.addEventListener('change', (e) => {
+            qualityDescGroup.style.display = e.target.checked ? 'block' : 'none';
+        });
+    }
+    
+    // Override confirm button behavior
+    const confirmButton = document.getElementById('modal-confirm');
+    if (confirmButton) {
+        confirmButton.onclick = () => {
+            const description = document.getElementById('modal-step-description').value.trim();
+            const partsSelect = document.getElementById('modal-step-parts');
+            const toolsSelect = document.getElementById('modal-step-tools');
+            const fixturesSelect = document.getElementById('modal-step-fixtures');
+            const safetySelect = document.getElementById('modal-step-safety');
+            const safetyText = document.getElementById('modal-step-safety-text').value.trim();
+            const estimatedTime = parseInt(document.getElementById('modal-step-time').value) || 0;
+            const qualityCheck = document.getElementById('modal-step-quality').checked;
+            const qualityDescription = document.getElementById('modal-step-quality-desc').value.trim();
+            const notes = document.getElementById('modal-step-notes').value.trim();
+            
+            if (!description) {
+                alert('Please provide a step description');
+                return;
+            }
+            
+            // Get selected parts with default quantity of 1
+            const selectedParts = Array.from(partsSelect.selectedOptions).map(option => ({
+                partId: option.value,
+                quantity: 1
+            }));
+            
+            // Get selected tools
+            const selectedTools = Array.from(toolsSelect.selectedOptions).map(option => option.value);
+            
+            // Get selected fixtures
+            const selectedFixtures = Array.from(fixturesSelect.selectedOptions).map(option => option.value);
+            
+            // Get selected safety items and combine with free text
+            const selectedSafetyItems = Array.from(safetySelect.selectedOptions).map(option => {
+                const safety = stateManager.getSafety(option.value);
+                return safety ? `${safety.name}: ${safety.description}` : option.textContent;
+            });
+            
+            // Add free text safety notes if provided
+            const allSafety = [...selectedSafetyItems];
+            if (safetyText) {
+                allSafety.push(safetyText);
+            }
+            
+            const stepData = {
+                description,
+                parts: selectedParts,
+                tools: selectedTools,
+                fixtures: selectedFixtures,
+                safety: allSafety,
+                estimatedTime,
+                qualityCheck,
+                qualityDescription: qualityCheck ? qualityDescription : '',
+                notes
+            };
+            
+            addAssemblyStep(stepData);
+            hideModal();
+        };
+    }
+}
+
+/**
+ * Edit an existing assembly step
+ */
+function editAssemblyStep(stepId) {
+    const currentSOP = stateManager.getCurrentSOP();
+    const step = currentSOP.steps.find(s => s.id === stepId);
+    
+    if (!step) return;
+    
+    // Show the same modal but pre-populated with existing data
+    showAddAssemblyStepModal();
+    
+    // Pre-populate the form
+    setTimeout(() => {
+        document.getElementById('modal-step-description').value = step.description;
+        document.getElementById('modal-step-time').value = step.estimatedTime || '';
+        document.getElementById('modal-step-quality').checked = step.qualityCheck;
+        document.getElementById('modal-step-quality-desc').value = step.qualityDescription || '';
+        document.getElementById('modal-step-notes').value = step.notes || '';
+        
+        // Show quality description if quality check is enabled
+        const qualityDescGroup = document.getElementById('quality-description-group');
+        if (qualityDescGroup) {
+            qualityDescGroup.style.display = step.qualityCheck ? 'block' : 'none';
+        }
+        
+        // Select parts, tools, and fixtures
+        const partsSelect = document.getElementById('modal-step-parts');
+        const toolsSelect = document.getElementById('modal-step-tools');
+        const fixturesSelect = document.getElementById('modal-step-fixtures');
+        const safetySelect = document.getElementById('modal-step-safety');
+        
+        step.parts.forEach(partRef => {
+            const option = partsSelect.querySelector(`option[value="${partRef.partId}"]`);
+            if (option) option.selected = true;
+        });
+        
+        step.tools.forEach(toolId => {
+            const option = toolsSelect.querySelector(`option[value="${toolId}"]`);
+            if (option) option.selected = true;
+        });
+        
+        step.fixtures.forEach(fixtureId => {
+            const option = fixturesSelect.querySelector(`option[value="${fixtureId}"]`);
+            if (option) option.selected = true;
+        });
+        
+        // Handle safety requirements - separate database items from free text
+        const safetyItems = stateManager.getAllSafety();
+        const freeTextSafety = [];
+        
+        if (step.safety) {
+            step.safety.forEach(safetyReq => {
+                // Check if this matches a database safety item
+                const matchedSafety = safetyItems.find(safety => 
+                    safetyReq.includes(safety.name) && safetyReq.includes(safety.description)
+                );
+                
+                if (matchedSafety) {
+                    const option = safetySelect.querySelector(`option[value="${matchedSafety.id}"]`);
+                    if (option) option.selected = true;
+                } else {
+                    freeTextSafety.push(safetyReq);
+                }
+            });
+        }
+        
+        // Set free text safety
+        const safetyTextArea = document.getElementById('modal-step-safety-text');
+        if (safetyTextArea) {
+            safetyTextArea.value = freeTextSafety.join('\n');
+        }
+        
+        // Update modal title
+        document.getElementById('modal-title').textContent = `Edit Assembly Step ${step.stepNumber}`;
+        
+        // Override confirm button to update instead of add
+        const confirmButton = document.getElementById('modal-confirm');
+        if (confirmButton) {
+            confirmButton.onclick = () => {
+                const description = document.getElementById('modal-step-description').value.trim();
+                const partsSelect = document.getElementById('modal-step-parts');
+                const toolsSelect = document.getElementById('modal-step-tools');
+                const fixturesSelect = document.getElementById('modal-step-fixtures');
+                const safetySelect = document.getElementById('modal-step-safety');
+                const safetyText = document.getElementById('modal-step-safety-text').value.trim();
+                const estimatedTime = parseInt(document.getElementById('modal-step-time').value) || 0;
+                const qualityCheck = document.getElementById('modal-step-quality').checked;
+                const qualityDescription = document.getElementById('modal-step-quality-desc').value.trim();
+                const notes = document.getElementById('modal-step-notes').value.trim();
+                
+                if (!description) {
+                    alert('Please provide a step description');
+                    return;
+                }
+                
+                // Get selected parts with existing quantities (or default to 1)
+                const selectedParts = Array.from(partsSelect.selectedOptions).map(option => {
+                    const existingPart = step.parts.find(p => p.partId === option.value);
+                    return {
+                        partId: option.value,
+                        quantity: existingPart ? existingPart.quantity : 1
+                    };
+                });
+                
+                const selectedTools = Array.from(toolsSelect.selectedOptions).map(option => option.value);
+                const selectedFixtures = Array.from(fixturesSelect.selectedOptions).map(option => option.value);
+                
+                // Get selected safety items and combine with free text
+                const selectedSafetyItems = Array.from(safetySelect.selectedOptions).map(option => {
+                    const safety = stateManager.getSafety(option.value);
+                    return safety ? `${safety.name}: ${safety.description}` : option.textContent;
+                });
+                
+                // Add free text safety notes if provided
+                const allSafety = [...selectedSafetyItems];
+                if (safetyText) {
+                    allSafety.push(safetyText);
+                }
+                
+                const updates = {
+                    description,
+                    parts: selectedParts,
+                    tools: selectedTools,
+                    fixtures: selectedFixtures,
+                    safety: allSafety,
+                    estimatedTime,
+                    qualityCheck,
+                    qualityDescription: qualityCheck ? qualityDescription : '',
+                    notes
+                };
+                
+                updateAssemblyStep(stepId, updates);
+                hideModal();
+            };
+        }
+    }, 100);
+}
+
+/**
+ * Validate assembly form
+ */
+function validateAssemblyForm() {
+    const currentSOP = stateManager.getCurrentSOP();
+    const steps = currentSOP.steps || [];
+    
+    if (steps.length === 0) {
+        stateManager.setValidationError('assembly', 'At least one assembly step must be defined');
+        return false;
+    }
+    
+    // Validate each step
+    for (const step of steps) {
+        if (!step.description.trim()) {
+            stateManager.setValidationError('assembly', `Step ${step.stepNumber} is missing a description`);
+            return false;
+        }
+    }
+    
+    stateManager.clearValidationError('assembly');
     return true;
 }
 

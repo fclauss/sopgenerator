@@ -2123,4 +2123,257 @@ body {
     .database-items {
         max-height: 200px;
     }
+}
+
+/* Assembly Styles */
+
+/* Assembly Container */
+.assembly-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+    min-height: 200px;
+}
+
+/* Assembly Empty State */
+.assembly-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-secondary);
+    min-height: 150px;
+    background: rgba(242, 244, 245, 0.3);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--color-border);
+}
+
+.assembly-empty p {
+    margin: 0;
+    font-size: var(--font-size-base);
+}
+
+.assembly-help {
+    font-size: var(--font-size-sm) !important;
+    margin-top: var(--spacing-xs) !important;
+}
+
+/* Assembly Step Card */
+.assembly-step {
+    display: flex;
+    gap: var(--spacing-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-normal);
+}
+
+.assembly-step:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Assembly Step Image Placeholder */
+.assembly-step-image {
+    flex: 0 0 300px;
+    height: 200px;
+    background: rgba(242, 244, 245, 0.5);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.image-placeholder-icon {
+    font-size: var(--font-size-xl);
+    opacity: 0.6;
+}
+
+.image-placeholder-text {
+    font-weight: var(--font-weight-medium);
+    opacity: 0.8;
+}
+
+/* Assembly Step Content */
+.assembly-step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Assembly Step Header */
+.assembly-step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.assembly-step-number {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+}
+
+.assembly-step-controls {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.step-control-btn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-xs);
+    cursor: pointer;
+    transition: var(--transition-normal);
+    font-size: var(--font-size-sm);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-control-btn:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.step-control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.step-edit-btn:hover:not(:disabled) {
+    background: var(--color-warning);
+    border-color: var(--color-warning);
+}
+
+.step-remove-btn:hover:not(:disabled) {
+    background: var(--color-error);
+    border-color: var(--color-error);
+}
+
+/* Assembly Step Body */
+.assembly-step-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.assembly-step-description {
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-sm);
+}
+
+.assembly-step-parts,
+.assembly-step-tools,
+.assembly-step-fixtures,
+.assembly-step-safety,
+.assembly-step-time,
+.assembly-step-quality,
+.assembly-step-notes {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.assembly-step-parts strong,
+.assembly-step-tools strong,
+.assembly-step-fixtures strong,
+.assembly-step-safety strong,
+.assembly-step-time strong,
+.assembly-step-quality strong,
+.assembly-step-notes strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.assembly-step-safety {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 4px solid var(--color-warning);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    margin: var(--spacing-xs) 0;
+}
+
+.assembly-step-safety strong {
+    color: var(--color-warning);
+}
+
+/* Assembly Step Modal Form */
+.assembly-step-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.assembly-step-modal-form .form-select {
+    min-height: 120px;
+}
+
+.assembly-step-modal-form .form-select[multiple] {
+    padding: var(--spacing-sm);
+}
+
+.assembly-step-modal-form .form-select[multiple] option {
+    padding: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+}
+
+.assembly-step-modal-form .form-select[multiple] option:checked {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Form Checkbox Styling */
+.form-checkbox {
+    margin-right: var(--spacing-xs);
+    transform: scale(1.1);
+}
+
+/* Responsive Assembly Styles */
+@media (max-width: 768px) {
+    .assembly-step-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: flex-start;
+    }
+    
+    .assembly-step-controls {
+        align-self: flex-end;
+    }
+    
+    .assembly-step-modal-form .form-select {
+        font-size: var(--font-size-sm);
+    }
+    
+    /* Stack assembly step layout vertically on mobile */
+    .assembly-step {
+        flex-direction: column;
+    }
+    
+    .assembly-step-image {
+        flex: none;
+        width: 100%;
+        height: 150px;
+    }
 } 
