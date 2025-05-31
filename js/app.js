@@ -2275,6 +2275,9 @@ function setupEventListeners() {
     // Basic Info form event listeners
     setupBasicInfoFormListeners();
     
+    // BOM form event listeners
+    setupBOMFormListeners();
+    
     // Modal event listeners
     const modalOverlay = document.getElementById('modal-overlay');
     const modalClose = document.querySelector('.modal-close');
@@ -2459,6 +2462,7 @@ function showSection(sectionIndex) {
         // Update parts database when BOM section is shown
         if (sectionIndex === 1) { // BOM section
             updatePartsDatabase();
+            updateBOMDisplay();
         }
     }
 }
@@ -3349,6 +3353,416 @@ function validateBasicInfoForm() {
     });
     
     return isValid;
+}
+
+/**
+ * Validate the entire Basic Info form
+ */
+function validateBasicInfoForm() {
+    const basicInfoForm = document.getElementById('basic-info-form');
+    if (!basicInfoForm) return false;
+    
+    const formInputs = basicInfoForm.querySelectorAll('input[required], textarea[required]');
+    let isValid = true;
+    
+    formInputs.forEach(input => {
+        if (!validateBasicInfoField(input)) {
+            isValid = false;
+        }
+    });
+    
+    return isValid;
+}
+
+/**
+ * Setup BOM form event listeners and functionality
+ */
+function setupBOMFormListeners() {
+    // Setup parts database click handlers
+    setupPartsSelectionHandlers();
+    
+    // Setup add BOM item button
+    const addBOMButton = document.getElementById('add-bom-item');
+    if (addBOMButton) {
+        addBOMButton.addEventListener('click', handleAddBOMItem);
+    }
+    
+    // Setup add new part button
+    const addPartButton = document.querySelector('[data-database="parts"]');
+    if (addPartButton) {
+        addPartButton.addEventListener('click', handleAddNewPart);
+    }
+    
+    // Load existing BOM data
+    loadBOMData();
+    
+    console.log('BOM form listeners setup complete');
+}
+
+/**
+ * Setup click handlers for parts in the database
+ */
+function setupPartsSelectionHandlers() {
+    const partsContainer = document.getElementById('parts-database');
+    if (!partsContainer) return;
+    
+    // Use event delegation for dynamically added parts
+    partsContainer.addEventListener('click', handlePartSelection);
+}
+
+/**
+ * Handle clicking on a part in the database
+ */
+function handlePartSelection(event) {
+    const partItem = event.target.closest('.database-item');
+    if (!partItem) return;
+    
+    const partId = partItem.dataset.id;
+    const part = stateManager.getPart(partId);
+    
+    if (!part) return;
+    
+    // Add part to BOM with default quantity of 1
+    addPartToBOM(partId, 1);
+}
+
+/**
+ * Handle adding a BOM item manually
+ */
+function handleAddBOMItem() {
+    // Show modal to select part and quantity
+    showBOMItemModal();
+}
+
+/**
+ * Handle adding a new part to the database
+ */
+function handleAddNewPart() {
+    showAddPartModal();
+}
+
+/**
+ * Add a part to the BOM
+ */
+function addPartToBOM(partId, quantity = 1) {
+    const currentSOP = stateManager.getCurrentSOP();
+    const part = stateManager.getPart(partId);
+    
+    if (!part) {
+        console.error('Part not found:', partId);
+        return;
+    }
+    
+    // Check if part is already in BOM
+    const existingItem = currentSOP.bom.find(item => item.partId === partId);
+    
+    if (existingItem) {
+        // Update quantity
+        existingItem.quantity += quantity;
+    } else {
+        // Add new BOM item
+        currentSOP.addBOMItem(partId, quantity);
+    }
+    
+    // Update UI and save
+    updateBOMDisplay();
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Added part ${part.name} to BOM with quantity ${quantity}`);
+}
+
+/**
+ * Remove a part from the BOM
+ */
+function removePartFromBOM(partId) {
+    const currentSOP = stateManager.getCurrentSOP();
+    const part = stateManager.getPart(partId);
+    
+    currentSOP.removeBOMItem(partId);
+    
+    // Update UI and save
+    updateBOMDisplay();
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Removed part ${part?.name || partId} from BOM`);
+}
+
+/**
+ * Update BOM item quantity
+ */
+function updateBOMItemQuantity(partId, newQuantity) {
+    const currentSOP = stateManager.getCurrentSOP();
+    const bomItem = currentSOP.bom.find(item => item.partId === partId);
+    
+    if (!bomItem) return;
+    
+    if (newQuantity <= 0) {
+        removePartFromBOM(partId);
+        return;
+    }
+    
+    bomItem.quantity = parseInt(newQuantity);
+    
+    // Update UI and save
+    updateBOMDisplay();
+    stateManager.markDirty();
+    stateManager.saveToStorage();
+    
+    console.log(`Updated BOM item ${partId} quantity to ${newQuantity}`);
+}
+
+/**
+ * Update the BOM display
+ */
+function updateBOMDisplay() {
+    const bomContainer = document.getElementById('bom-container');
+    if (!bomContainer) return;
+    
+    const currentSOP = stateManager.getCurrentSOP();
+    const bomItems = currentSOP.bom || [];
+    
+    if (bomItems.length === 0) {
+        bomContainer.innerHTML = `
+            <div class="bom-empty">
+                <p>No parts added to BOM yet</p>
+                <p class="bom-help">Click on parts from the database or use "Add BOM Item" to get started</p>
+            </div>
+        `;
+        return;
+    }
+    
+    bomContainer.innerHTML = bomItems.map(bomItem => {
+        const part = stateManager.getPart(bomItem.partId);
+        if (!part) return ''; // Skip if part not found
+        
+        return `
+            <div class="bom-item" data-part-id="${bomItem.partId}">
+                <div class="bom-item-header">
+                    <div class="bom-item-info">
+                        <strong class="bom-item-name">${part.name}</strong>
+                        <span class="bom-item-number">${part.partNumber}</span>
+                    </div>
+                    <button type="button" class="bom-item-remove" onclick="removePartFromBOM('${bomItem.partId}')" aria-label="Remove ${part.name} from BOM">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="bom-item-description">${part.description}</div>
+                <div class="bom-item-details">
+                    <span class="bom-item-category">${part.category}</span>
+                    <div class="bom-item-quantity">
+                        <label for="quantity-${bomItem.partId}" class="bom-quantity-label">Qty:</label>
+                        <input 
+                            type="number" 
+                            id="quantity-${bomItem.partId}"
+                            class="bom-quantity-input" 
+                            value="${bomItem.quantity}" 
+                            min="1" 
+                            max="9999"
+                            onchange="updateBOMItemQuantity('${bomItem.partId}', this.value)"
+                            aria-label="Quantity for ${part.name}"
+                        >
+                    </div>
+                </div>
+            </div>
+        `;
+    }).filter(html => html).join('');
+}
+
+/**
+ * Load existing BOM data into the display
+ */
+function loadBOMData() {
+    updateBOMDisplay();
+}
+
+/**
+ * Show modal for adding BOM item
+ */
+function showBOMItemModal() {
+    const parts = stateManager.getAllParts();
+    
+    if (parts.length === 0) {
+        showModal('No Parts Available', 'Please add parts to the database first before creating a BOM.');
+        return;
+    }
+    
+    const partOptions = parts.map(part => 
+        `<option value="${part.id}">${part.name} (${part.partNumber})</option>`
+    ).join('');
+    
+    const modalContent = `
+        <div class="bom-modal-form">
+            <div class="form-group">
+                <label for="modal-part-select" class="form-label">Select Part</label>
+                <select id="modal-part-select" class="form-select">
+                    <option value="">Choose a part...</option>
+                    ${partOptions}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-quantity-input" class="form-label">Quantity</label>
+                <input 
+                    type="number" 
+                    id="modal-quantity-input" 
+                    class="form-input" 
+                    value="1" 
+                    min="1" 
+                    max="9999"
+                >
+            </div>
+        </div>
+    `;
+    
+    showModal('Add BOM Item', modalContent, true);
+    
+    // Override confirm button behavior
+    const confirmButton = document.getElementById('modal-confirm');
+    if (confirmButton) {
+        confirmButton.onclick = () => {
+            const partSelect = document.getElementById('modal-part-select');
+            const quantityInput = document.getElementById('modal-quantity-input');
+            
+            const partId = partSelect.value;
+            const quantity = parseInt(quantityInput.value) || 1;
+            
+            if (!partId) {
+                alert('Please select a part');
+                return;
+            }
+            
+            addPartToBOM(partId, quantity);
+            hideModal();
+        };
+    }
+}
+
+/**
+ * Show modal for adding new part
+ */
+function showAddPartModal() {
+    const modalContent = `
+        <div class="add-part-modal-form">
+            <div class="form-group">
+                <label for="modal-part-name" class="form-label required">Part Name</label>
+                <input 
+                    type="text" 
+                    id="modal-part-name" 
+                    class="form-input" 
+                    placeholder="Enter part name..."
+                    required
+                >
+            </div>
+            <div class="form-group">
+                <label for="modal-part-number" class="form-label required">Part Number</label>
+                <input 
+                    type="text" 
+                    id="modal-part-number" 
+                    class="form-input" 
+                    placeholder="Enter part number..."
+                    required
+                >
+            </div>
+            <div class="form-group">
+                <label for="modal-part-description" class="form-label">Description</label>
+                <textarea 
+                    id="modal-part-description" 
+                    class="form-textarea" 
+                    placeholder="Enter part description..."
+                    rows="3"
+                ></textarea>
+            </div>
+            <div class="form-group">
+                <label for="modal-part-category" class="form-label">Category</label>
+                <select id="modal-part-category" class="form-select">
+                    <option value="Hardware">Hardware</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Mechanical">Mechanical</option>
+                    <option value="Fasteners">Fasteners</option>
+                    <option value="Materials">Materials</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+    `;
+    
+    showModal('Add New Part', modalContent, true);
+    
+    // Override confirm button behavior
+    const confirmButton = document.getElementById('modal-confirm');
+    if (confirmButton) {
+        confirmButton.onclick = () => {
+            const nameInput = document.getElementById('modal-part-name');
+            const numberInput = document.getElementById('modal-part-number');
+            const descriptionInput = document.getElementById('modal-part-description');
+            const categorySelect = document.getElementById('modal-part-category');
+            
+            const name = nameInput.value.trim();
+            const partNumber = numberInput.value.trim();
+            const description = descriptionInput.value.trim();
+            const category = categorySelect.value;
+            
+            if (!name || !partNumber) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Create new part
+            const newPart = {
+                name,
+                partNumber,
+                description: description || `${name} component`,
+                category,
+                specifications: {},
+                supplier: '',
+                cost: 0
+            };
+            
+            try {
+                const addedPart = stateManager.addPart(newPart);
+                updatePartsDatabase();
+                
+                // Automatically add to BOM
+                addPartToBOM(addedPart.id, 1);
+                
+                hideModal();
+                console.log('Added new part:', addedPart);
+            } catch (error) {
+                alert('Error adding part: ' + error.message);
+            }
+        };
+    }
+}
+
+/**
+ * Validate BOM form
+ */
+function validateBOMForm() {
+    const currentSOP = stateManager.getCurrentSOP();
+    const bomItems = currentSOP.bom || [];
+    
+    if (bomItems.length === 0) {
+        stateManager.setValidationError('bom', 'At least one part must be added to the BOM');
+        return false;
+    }
+    
+    // Validate that all BOM parts exist in database
+    for (const bomItem of bomItems) {
+        const part = stateManager.getPart(bomItem.partId);
+        if (!part) {
+            stateManager.setValidationError('bom', `Part ${bomItem.partId} not found in database`);
+            return false;
+        }
+        
+        if (bomItem.quantity <= 0) {
+            stateManager.setValidationError('bom', `Invalid quantity for part ${part.name}`);
+            return false;
+        }
+    }
+    
+    stateManager.clearValidationError('bom');
+    return true;
 }
 
 // Initialize the application when DOM is loaded

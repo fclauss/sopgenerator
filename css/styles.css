@@ -1799,4 +1799,328 @@ body {
     width: 100%;
     text-align: center;
     padding: var(--spacing-md);
+}
+
+/* BOM (Bill of Materials) Styles */
+
+/* BOM Container */
+.bom-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    min-height: 200px;
+    padding: var(--spacing-md);
+    background: rgba(242, 244, 245, 0.3);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--color-border);
+}
+
+/* BOM Empty State */
+.bom-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-secondary);
+    min-height: 150px;
+}
+
+.bom-empty p {
+    margin: 0;
+    font-size: var(--font-size-base);
+}
+
+.bom-help {
+    font-size: var(--font-size-sm) !important;
+    margin-top: var(--spacing-xs) !important;
+    opacity: 0.8;
+}
+
+/* BOM Items */
+.bom-item {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    transition: var(--transition-normal);
+    position: relative;
+}
+
+.bom-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(5, 82, 99, 0.1);
+}
+
+/* BOM Item Header */
+.bom-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+}
+
+.bom-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    flex: 1;
+}
+
+.bom-item-name {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.bom-item-number {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-family: var(--font-family-mono);
+    background: rgba(5, 82, 99, 0.1);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    width: fit-content;
+}
+
+/* BOM Item Remove Button */
+.bom-item-remove {
+    background: var(--color-error);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    font-size: var(--font-size-lg);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.bom-item-remove:hover {
+    background: var(--color-error-dark);
+    transform: scale(1.1);
+}
+
+.bom-item-remove:focus {
+    outline: 2px solid var(--color-error);
+    outline-offset: 2px;
+}
+
+/* BOM Item Description */
+.bom-item-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+}
+
+/* BOM Item Details */
+.bom-item-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.bom-item-category {
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+    background: rgba(5, 82, 99, 0.1);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+/* BOM Quantity Controls */
+.bom-item-quantity {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.bom-quantity-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.bom-quantity-input {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    background: var(--color-surface);
+    transition: var(--transition-normal);
+}
+
+.bom-quantity-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(5, 82, 99, 0.1);
+}
+
+.bom-quantity-input:invalid {
+    border-color: var(--color-error);
+}
+
+/* BOM Modal Styles */
+.bom-modal-form,
+.add-part-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+/* Database Column for BOM Section */
+.database-column {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.database-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-md) 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.database-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: var(--spacing-md);
+}
+
+.database-item {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.database-item:hover {
+    border-color: var(--color-primary);
+    background: rgba(5, 82, 99, 0.05);
+    transform: translateY(-1px);
+}
+
+.database-item:active {
+    transform: translateY(0);
+}
+
+.database-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.database-item-header strong {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.database-item-number {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-family: var(--font-family-mono);
+}
+
+.database-item-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.3;
+}
+
+.database-item-category {
+    font-size: var(--font-size-xs);
+    color: var(--color-primary);
+    background: rgba(5, 82, 99, 0.1);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+.database-empty {
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    padding: var(--spacing-lg);
+}
+
+/* Add Button Styles */
+.add-button {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    justify-content: center;
+    width: 100%;
+}
+
+.add-button:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
+
+.add-button:active {
+    transform: translateY(0);
+}
+
+.add-button:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Responsive Design for BOM */
+@media (max-width: 768px) {
+    .bom-item-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .bom-item-quantity {
+        align-self: flex-end;
+    }
+    
+    .bom-quantity-input {
+        width: 60px;
+    }
+    
+    .database-items {
+        max-height: 200px;
+    }
 } 
