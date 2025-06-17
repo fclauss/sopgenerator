@@ -2734,9 +2734,9 @@ function generateActualSOPContent() {
         <header class="section-header">
             <h2 class="section-title">
                 <span class="section-number">📄</span>
-                Generated SOP Document
+                ${window.i18n.t('sopDocument')}
             </h2>
-            <p class="section-description">Your complete Standard Operating Procedure</p>
+            <p class="section-description">${window.i18n.t('sopDocumentDescription')}</p>
         </header>
         <div class="section-content">
             <div class="sop-document">
@@ -2744,13 +2744,13 @@ function generateActualSOPContent() {
             </div>
             <div class="sop-actions">
                 <button type="button" class="button button--primary" onclick="printSOP()">
-                    <span aria-hidden="true">🖨️</span> Print SOP
+                    <span aria-hidden="true">🖨️</span> ${window.i18n.t('printSOP')}
                 </button>
                 <button type="button" class="button button--secondary" onclick="exportSOP()">
-                    <span aria-hidden="true">💾</span> Export PDF
+                    <span aria-hidden="true">💾</span> ${window.i18n.t('exportPDF')}
                 </button>
                 <button type="button" class="button button--secondary" onclick="editSOP()">
-                    <span aria-hidden="true">✏️</span> Edit SOP
+                    <span aria-hidden="true">✏️</span> ${window.i18n.t('editSOP')}
                 </button>
             </div>
         </div>
@@ -2779,6 +2779,16 @@ function generateSOPHTML(sop) {
     // Generate assembly steps table
     const assemblyHTML = generateAssemblyStepsTable(sop, parts, tools, fixtures);
 
+    // Get localized strings
+    const sopHeaderText = {
+        en: 'STANDARD OPERATING PROCEDURE',
+        de: 'STANDARDARBEITSANWEISUNG',
+        fr: 'PROCÉDURE OPÉRATIONNELLE STANDARD'
+    };
+
+    const currentLang = window.i18n.getCurrentLanguage();
+    const headerText = sopHeaderText[currentLang] || sopHeaderText.en;
+
     return `
         <div class="sop-header">
             ${companyData.logo ? `
@@ -2787,34 +2797,34 @@ function generateSOPHTML(sop) {
                 </div>
             ` : ''}
             <div class="sop-title-block">
-                <h1>STANDARD OPERATING PROCEDURE</h1>
-                <h2>${sop.title || 'Assembly Procedure'}</h2>
+                <h1>${headerText}</h1>
+                <h2>${sop.title || window.i18n.t('assemblyTitle')}</h2>
                 ${companyData.name ? `<h3>${companyData.name}</h3>` : ''}
             </div>
             <div class="sop-info-grid">
                 <div class="sop-info-item">
-                    <strong>Part Number:</strong> ${sop.partNumber || 'N/A'}
+                    <strong>${window.i18n.t('partNumber')}:</strong> ${sop.partNumber || 'N/A'}
                 </div>
                 <div class="sop-info-item">
-                    <strong>Revision:</strong> ${sop.revision || 'A'}
+                    <strong>${window.i18n.t('revision')}:</strong> ${sop.revision || 'A'}
                 </div>
                 <div class="sop-info-item">
-                    <strong>Author:</strong> ${sop.author || 'N/A'}
+                    <strong>${window.i18n.t('author')}:</strong> ${sop.author || 'N/A'}
                 </div>
                 <div class="sop-info-item">
-                    <strong>Department:</strong> ${sop.department || 'N/A'}
+                    <strong>${window.i18n.t('department')}:</strong> ${sop.department || 'N/A'}
                 </div>
                 <div class="sop-info-item">
-                    <strong>Approver:</strong> ${sop.approver || 'N/A'}
+                    <strong>${window.i18n.t('approver')}:</strong> ${sop.approver || 'N/A'}
                 </div>
                 <div class="sop-info-item">
-                    <strong>Effective Date:</strong> ${sop.effectiveDate || currentDate}
+                    <strong>${window.i18n.t('effectiveDate')}:</strong> ${sop.effectiveDate || currentDate}
                 </div>
                 <div class="sop-info-item">
-                    <strong>Generated:</strong> ${currentDate}
+                    <strong>${currentLang === 'de' ? 'Generiert' : currentLang === 'fr' ? 'Généré' : 'Generated'}:</strong> ${currentDate}
                 </div>
                 <div class="sop-info-item">
-                    <strong>Total Time:</strong> ${sop.estimatedTotalTime || 0} minutes
+                    <strong>${currentLang === 'de' ? 'Gesamtzeit' : currentLang === 'fr' ? 'Temps total' : 'Total Time'}:</strong> ${sop.estimatedTotalTime || 0} ${currentLang === 'de' ? 'Minuten' : currentLang === 'fr' ? 'minutes' : 'minutes'}
                 </div>
                 ${companyData.phone ? `
                     <div class="sop-info-item">
@@ -2836,15 +2846,14 @@ function generateSOPHTML(sop) {
 
         ${sop.notes ? `
             <div class="sop-section">
-                <h3>GENERAL NOTES</h3>
+                <h3>${window.i18n.t('generalNotes')}</h3>
                 <p>${sop.notes}</p>
             </div>
         ` : ''}
 
         <div class="sop-section">
-            <h3>SCOPE</h3>
-            <p>This Standard Operating Procedure describes the assembly process for ${sop.title || 'the specified components'}.
-            Follow all steps in sequence and adhere to safety requirements throughout the process.</p>
+            <h3>${window.i18n.t('scope') || 'SCOPE'}</h3>
+            <p>${window.i18n.t('scopeDescription') || `This Standard Operating Procedure describes the assembly process for ${sop.title || 'the specified components'}. Follow all steps in sequence and adhere to safety requirements throughout the process.`}</p>
         </div>
 
         ${safetyHTML}
@@ -2862,8 +2871,8 @@ function generateBOMTable(sop, allParts) {
     if (!sop.bom || sop.bom.length === 0) {
         return `
             <div class="sop-section">
-                <h3>BILL OF MATERIALS</h3>
-                <p><em>No parts specified in BOM</em></p>
+                <h3>${window.i18n.t('bomTitle')}</h3>
+                <p><em>${window.i18n.t('noPartsSpecified') || 'No parts specified in BOM'}</em></p>
             </div>
         `;
     }
@@ -2879,23 +2888,23 @@ function generateBOMTable(sop, allParts) {
                 <td>${part.name}</td>
                 <td>${part.description || 'N/A'}</td>
                 <td>${bomItem.quantity}</td>
-                <td>${part.category || 'General'}</td>
+                <td>${part.category || window.i18n.t('general') || 'General'}</td>
             </tr>
         `;
     }).join('');
 
     return `
         <div class="sop-section">
-            <h3>BILL OF MATERIALS</h3>
+            <h3>${window.i18n.t('bomTitle')}</h3>
             <table class="sop-table">
                 <thead>
                     <tr>
-                        <th>Item</th>
-                        <th>Part Number</th>
-                        <th>Description</th>
-                        <th>Specifications</th>
-                        <th>Qty</th>
-                        <th>Category</th>
+                        <th>${window.i18n.t('item') || 'Item'}</th>
+                        <th>${window.i18n.t('partNumber')}</th>
+                        <th>${window.i18n.t('description')}</th>
+                        <th>${window.i18n.t('specifications')}</th>
+                        <th>${window.i18n.t('qty') || 'Qty'}</th>
+                        <th>${window.i18n.t('category')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -2920,14 +2929,14 @@ function generateSafetySection(sop, allSafetyItems) {
 
     // Add general safety note
     if (!safetyContent) {
-        safetyContent = '<p><em>No specific safety requirements defined. Follow general workplace safety guidelines.</em></p>';
+        safetyContent = `<p><em>${window.i18n.t('noSafetyRequirements') || 'No specific safety requirements defined. Follow general workplace safety guidelines.'}</em></p>`;
     }
 
     return `
         <div class="sop-section sop-safety">
-            <h3>⚠️ SAFETY REQUIREMENTS</h3>
+            <h3>⚠️ ${window.i18n.t('safetyTitle')}</h3>
             <div class="safety-warning">
-                <strong>WARNING:</strong> Ensure all safety requirements are met before beginning assembly.
+                <strong>${window.i18n.t('warning') || 'WARNING'}:</strong> ${window.i18n.t('safetyWarning') || 'Ensure all safety requirements are met before beginning assembly.'}
             </div>
             ${safetyContent}
         </div>
@@ -2941,8 +2950,8 @@ function generateAssemblyStepsTable(sop, allParts, allTools, allFixtures) {
     if (!sop.steps || sop.steps.length === 0) {
         return `
             <div class="sop-section">
-                <h3>ASSEMBLY PROCEDURE</h3>
-                <p><em>No assembly steps defined</em></p>
+                <h3>${window.i18n.t('assemblyProcedure') || 'ASSEMBLY PROCEDURE'}</h3>
+                <p><em>${window.i18n.t('noAssemblyStepsDefined') || 'No assembly steps defined'}</em></p>
             </div>
         `;
     }
@@ -2951,57 +2960,57 @@ function generateAssemblyStepsTable(sop, allParts, allTools, allFixtures) {
         // Get part names
         const partNames = step.parts.map(partRef => {
             const part = allParts.find(p => p.id === partRef.partId);
-            return part ? `${part.name} (${partRef.quantity}x)` : 'Unknown part';
+            return part ? `${part.name} (${partRef.quantity}x)` : window.i18n.t('unknownPart') || 'Unknown part';
         }).join(', ');
 
         // Get tool names
         const toolNames = step.tools.map(toolId => {
             const tool = allTools.find(t => t.id === toolId);
-            return tool ? tool.name : 'Unknown tool';
+            return tool ? tool.name : window.i18n.t('unknownTool') || 'Unknown tool';
         }).join(', ');
 
         // Get fixture names
         const fixtureNames = step.fixtures.map(fixtureId => {
             const fixture = allFixtures.find(f => f.id === fixtureId);
-            return fixture ? fixture.name : 'Unknown fixture';
+            return fixture ? fixture.name : window.i18n.t('unknownFixture') || 'Unknown fixture';
         }).join(', ');
 
         // Combine tools and fixtures
         const toolsAndFixtures = [toolNames, fixtureNames].filter(Boolean).join(', ');
 
         // Build step content
-        let stepContent = `<strong>Step ${step.stepNumber}:</strong> ${step.description}`;
+        let stepContent = `<strong>${window.i18n.t('progressStep')} ${step.stepNumber}:</strong> ${step.description}`;
 
         if (partNames) {
-            stepContent += `<br><br><strong>Parts:</strong> ${partNames}`;
+            stepContent += `<br><br><strong>${window.i18n.t('partsUsed')}:</strong> ${partNames}`;
         }
 
         if (toolsAndFixtures) {
-            stepContent += `<br><strong>Tools/Fixtures:</strong> ${toolsAndFixtures}`;
+            stepContent += `<br><strong>${window.i18n.t('toolsFixtures') || 'Tools/Fixtures'}:</strong> ${toolsAndFixtures}`;
         }
 
         if (step.safety && step.safety.length > 0) {
-            stepContent += `<br><strong>Safety:</strong> ${step.safety.join(', ')}`;
+            stepContent += `<br><strong>${window.i18n.t('safetyRequirements')}:</strong> ${step.safety.join(', ')}`;
         }
 
         if (step.qualityCheck && step.qualityDescription) {
-            stepContent += `<br><strong>Quality Check:</strong> ✓ ${step.qualityDescription}`;
+            stepContent += `<br><strong>${window.i18n.t('qualityCheck')}:</strong> ✓ ${step.qualityDescription}`;
         }
 
         if (step.estimatedTime > 0) {
-            stepContent += `<br><strong>Time:</strong> ${step.estimatedTime} minutes`;
+            stepContent += `<br><strong>${window.i18n.t('time') || 'Time'}:</strong> ${step.estimatedTime} ${window.i18n.t('minutes')}`;
         }
 
         if (step.notes) {
-            stepContent += `<br><strong>Notes:</strong> ${step.notes}`;
+            stepContent += `<br><strong>${window.i18n.t('additionalNotes')}:</strong> ${step.notes}`;
         }
 
         // Image column
         const imageContent = step.image ?
-            `<img src="${step.image}" alt="Step ${step.stepNumber}" style="max-width: 100%; height: auto; border-radius: 4px;">` :
+            `<img src="${step.image}" alt="${window.i18n.t('progressStep')} ${step.stepNumber}" style="max-width: 100%; height: auto; border-radius: 4px;">` :
             `<div class="sop-image-placeholder">
                 <span>📷</span><br>
-                <small>No Image</small>
+                <small>${window.i18n.t('noImage')}</small>
             </div>`;
 
         return `
@@ -3014,12 +3023,12 @@ function generateAssemblyStepsTable(sop, allParts, allTools, allFixtures) {
 
     return `
         <div class="sop-section">
-            <h3>ASSEMBLY PROCEDURE</h3>
+            <h3>${window.i18n.t('assemblyProcedure') || 'ASSEMBLY PROCEDURE'}</h3>
             <table class="sop-table sop-assembly-table">
                 <thead>
                     <tr>
-                        <th style="width: 40%;">Image</th>
-                        <th style="width: 60%;">Assembly Step</th>
+                        <th style="width: 40%;">${window.i18n.t('image') || 'Image'}</th>
+                        <th style="width: 60%;">${window.i18n.t('assemblyStep') || 'Assembly Step'}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3052,6 +3061,83 @@ function editSOP() {
 }
 
 /**
+ * Setup language selector functionality
+ */
+function setupLanguageSelector() {
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        // Set current language
+        languageSelect.value = window.i18n.getCurrentLanguage();
+
+        // Handle language change
+        languageSelect.addEventListener('change', (e) => {
+            window.i18n.setLanguage(e.target.value);
+        });
+
+        // Listen for language changes to update dynamic content
+        document.addEventListener('languageChanged', () => {
+            updateDynamicContent();
+        });
+    }
+}
+
+/**
+ * Update dynamic content when language changes
+ */
+function updateDynamicContent() {
+    // Update database displays
+    updateSafetyDatabase();
+    updateToolsDatabase();
+    updateFixturesDatabase();
+    updatePartsDatabase();
+
+    // Update any generated content
+    updateSafetySelector();
+
+    // Update assembly steps if any exist
+    updateAssemblyStepsDisplay();
+
+    // Update modal buttons if modal is open
+    updateModalButtons();
+
+    // Regenerate SOP if it exists
+    regenerateSOPIfExists();
+
+    console.log('Dynamic content updated for language change');
+}
+
+/**
+ * Regenerate SOP if one exists (for language changes)
+ */
+function regenerateSOPIfExists() {
+    const sopDocument = document.getElementById('sop-document');
+    if (sopDocument && sopDocument.innerHTML.trim() !== '') {
+        // SOP exists, regenerate it
+        const currentSOP = stateManager.getCurrentSOP();
+        if (currentSOP && (currentSOP.title || currentSOP.bom?.length > 0 || currentSOP.steps?.length > 0)) {
+            console.log('Regenerating SOP for language change');
+            generateSOP();
+        }
+    }
+}
+
+/**
+ * Update modal buttons with current language
+ */
+function updateModalButtons() {
+    const cancelButton = document.getElementById('modal-cancel');
+    const confirmButton = document.getElementById('modal-confirm');
+
+    if (cancelButton) {
+        cancelButton.textContent = window.i18n.t('cancel');
+    }
+
+    if (confirmButton) {
+        confirmButton.textContent = window.i18n.t('confirm');
+    }
+}
+
+/**
  * Show company setup modal
  */
 function showCompanySetup() {
@@ -3060,19 +3146,19 @@ function showCompanySetup() {
     const modalContent = `
         <div class="company-setup-form">
             <div class="form-group">
-                <label for="modal-company-name" class="form-label required">Company Name</label>
+                <label for="modal-company-name" class="form-label required">${window.i18n.t('companyName')}</label>
                 <input
                     type="text"
                     id="modal-company-name"
                     class="form-input"
-                    placeholder="Enter your company name"
+                    placeholder="${window.i18n.t('companyNamePlaceholder')}"
                     value="${companyData.name || ''}"
                     required
                 >
             </div>
 
             <div class="form-group">
-                <label for="modal-company-logo" class="form-label">Company Logo</label>
+                <label for="modal-company-logo" class="form-label">${window.i18n.t('companyLogo')}</label>
                 <input
                     type="file"
                     id="modal-company-logo"
@@ -3080,59 +3166,59 @@ function showCompanySetup() {
                     accept="image/*"
                     aria-describedby="modal-company-logo-help"
                 >
-                <small id="modal-company-logo-help" class="form-help">Upload your company logo (optional)</small>
+                <small id="modal-company-logo-help" class="form-help">${window.i18n.t('companyLogoHelp')}</small>
                 <div id="modal-company-logo-preview" class="image-preview" style="display: ${companyData.logo ? 'block' : 'none'};">
                     <img id="modal-company-logo-preview-img" src="${companyData.logo || ''}" alt="Company logo preview" style="max-width: 200px; max-height: 100px; border-radius: 4px; margin-top: 8px;">
-                    <button type="button" id="modal-company-logo-remove" class="remove-image-btn" style="margin-left: 8px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    <button type="button" id="modal-company-logo-remove" class="remove-image-btn" style="margin-left: 8px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">${window.i18n.t('removeImage')}</button>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="modal-company-address" class="form-label">Address</label>
+                <label for="modal-company-address" class="form-label">${window.i18n.t('address')}</label>
                 <textarea
                     id="modal-company-address"
                     class="form-textarea"
-                    placeholder="Enter company address"
+                    placeholder="${window.i18n.t('addressPlaceholder')}"
                     rows="3"
                 >${companyData.address || ''}</textarea>
             </div>
 
             <div class="form-group">
-                <label for="modal-company-phone" class="form-label">Phone</label>
+                <label for="modal-company-phone" class="form-label">${window.i18n.t('phone')}</label>
                 <input
                     type="tel"
                     id="modal-company-phone"
                     class="form-input"
-                    placeholder="Enter phone number"
+                    placeholder="${window.i18n.t('phonePlaceholder')}"
                     value="${companyData.phone || ''}"
                 >
             </div>
 
             <div class="form-group">
-                <label for="modal-company-email" class="form-label">Email</label>
+                <label for="modal-company-email" class="form-label">${window.i18n.t('email')}</label>
                 <input
                     type="email"
                     id="modal-company-email"
                     class="form-input"
-                    placeholder="Enter company email"
+                    placeholder="${window.i18n.t('emailPlaceholder')}"
                     value="${companyData.email || ''}"
                 >
             </div>
 
             <div class="form-group">
-                <label for="modal-company-website" class="form-label">Website</label>
+                <label for="modal-company-website" class="form-label">${window.i18n.t('website')}</label>
                 <input
                     type="url"
                     id="modal-company-website"
                     class="form-input"
-                    placeholder="Enter company website"
+                    placeholder="${window.i18n.t('websitePlaceholder')}"
                     value="${companyData.website || ''}"
                 >
             </div>
         </div>
     `;
 
-    showModal('Company Setup', modalContent, true);
+    showModal(window.i18n.t('companySetup'), modalContent, true);
 
     // Setup logo upload handling
     setupCompanyLogoHandling();
@@ -3964,6 +4050,9 @@ function setupBOMFormListeners() {
     setupDatabaseAddButtons();
 
     console.log('BOM form listeners setup complete with database buttons');
+
+    // Setup language selector
+    setupLanguageSelector();
     
     // Load existing BOM data
     loadBOMData();
@@ -4233,7 +4322,7 @@ function showBOMItemModal() {
         </div>
     `;
     
-    showModal('Add BOM Item', modalContent, true);
+    showModal(window.i18n.t('addBOMItem'), modalContent, true);
     
     // Override confirm button behavior
     const confirmButton = document.getElementById('modal-confirm');
@@ -4263,36 +4352,36 @@ function showAddPartModal() {
     const modalContent = `
         <div class="add-part-modal-form">
             <div class="form-group">
-                <label for="modal-part-name" class="form-label required">Part Name</label>
-                <input 
-                    type="text" 
-                    id="modal-part-name" 
-                    class="form-input" 
-                    placeholder="Enter part name..."
+                <label for="modal-part-name" class="form-label required">${window.i18n.t('partName')}</label>
+                <input
+                    type="text"
+                    id="modal-part-name"
+                    class="form-input"
+                    placeholder="${window.i18n.t('enterName')}"
                     required
                 >
             </div>
             <div class="form-group">
-                <label for="modal-part-number" class="form-label required">Part Number</label>
-                <input 
-                    type="text" 
-                    id="modal-part-number" 
-                    class="form-input" 
-                    placeholder="Enter part number..."
+                <label for="modal-part-number" class="form-label required">${window.i18n.t('partNumber')}</label>
+                <input
+                    type="text"
+                    id="modal-part-number"
+                    class="form-input"
+                    placeholder="${window.i18n.t('partNumberPlaceholder')}"
                     required
                 >
             </div>
             <div class="form-group">
-                <label for="modal-part-description" class="form-label">Description</label>
-                <textarea 
-                    id="modal-part-description" 
-                    class="form-textarea" 
-                    placeholder="Enter part description..."
+                <label for="modal-part-description" class="form-label">${window.i18n.t('description')}</label>
+                <textarea
+                    id="modal-part-description"
+                    class="form-textarea"
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="3"
                 ></textarea>
             </div>
             <div class="form-group">
-                <label for="modal-part-category" class="form-label">Category</label>
+                <label for="modal-part-category" class="form-label">${window.i18n.t('category')}</label>
                 <select id="modal-part-category" class="form-select">
                     <option value="Hardware">Hardware</option>
                     <option value="Electronics">Electronics</option>
@@ -4305,7 +4394,7 @@ function showAddPartModal() {
         </div>
     `;
     
-    showModal('Add New Part', modalContent, true);
+    showModal(window.i18n.t('addNewPart'), modalContent, true);
     
     // Override confirm button behavior
     const confirmButton = document.getElementById('modal-confirm');
@@ -4322,7 +4411,7 @@ function showAddPartModal() {
             const category = categorySelect.value;
             
             if (!name || !partNumber) {
-                alert('Please fill in all required fields');
+                alert(window.i18n.t('pleaseFillinRequired'));
                 return;
             }
             
@@ -4360,7 +4449,7 @@ function showAddSafetyModal() {
     const modalContent = `
         <div class="add-safety-modal-form">
             <div class="form-group">
-                <label for="modal-safety-name" class="form-label required">Safety Item Name</label>
+                <label for="modal-safety-name" class="form-label required">${window.i18n.t('safetyItemName')}</label>
                 <input
                     type="text"
                     id="modal-safety-name"
@@ -4371,7 +4460,7 @@ function showAddSafetyModal() {
             </div>
 
             <div class="form-group">
-                <label for="modal-safety-identifier" class="form-label required">Identifier</label>
+                <label for="modal-safety-identifier" class="form-label required">${window.i18n.t('identifier')}</label>
                 <input
                     type="text"
                     id="modal-safety-identifier"
@@ -4382,41 +4471,41 @@ function showAddSafetyModal() {
             </div>
 
             <div class="form-group">
-                <label for="modal-safety-description" class="form-label">Description</label>
+                <label for="modal-safety-description" class="form-label">${window.i18n.t('description')}</label>
                 <textarea
                     id="modal-safety-description"
                     class="form-textarea"
-                    placeholder="Describe the safety requirement..."
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="3"
                 ></textarea>
             </div>
 
             <div class="form-group">
-                <label for="modal-safety-category" class="form-label">Category</label>
+                <label for="modal-safety-category" class="form-label">${window.i18n.t('category')}</label>
                 <select id="modal-safety-category" class="form-select">
-                    <option value="PPE">Personal Protective Equipment</option>
-                    <option value="Environmental">Environmental Safety</option>
-                    <option value="Equipment">Equipment Safety</option>
-                    <option value="Chemical">Chemical Safety</option>
-                    <option value="Fire">Fire Safety</option>
-                    <option value="Medical">Medical/First Aid</option>
-                    <option value="General">General Safety</option>
+                    <option value="PPE">${window.i18n.t('ppe')}</option>
+                    <option value="Environmental">${window.i18n.t('environmentalSafety')}</option>
+                    <option value="Equipment">${window.i18n.t('equipmentSafety')}</option>
+                    <option value="Chemical">${window.i18n.t('chemicalSafety')}</option>
+                    <option value="Fire">${window.i18n.t('fireSafety')}</option>
+                    <option value="Medical">${window.i18n.t('medicalFirstAid')}</option>
+                    <option value="General">${window.i18n.t('generalSafety')}</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="modal-safety-severity" class="form-label">Severity Level</label>
+                <label for="modal-safety-severity" class="form-label">${window.i18n.t('severityLevel')}</label>
                 <select id="modal-safety-severity" class="form-select">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
+                    <option value="low">${window.i18n.t('low')}</option>
+                    <option value="medium" selected>${window.i18n.t('medium')}</option>
+                    <option value="high">${window.i18n.t('high')}</option>
+                    <option value="critical">${window.i18n.t('critical')}</option>
                 </select>
             </div>
         </div>
     `;
 
-    showModal('Add Safety Item', modalContent, true);
+    showModal(window.i18n.t('addSafetyItem'), modalContent, true);
 
     // Override confirm button behavior
     const confirmButton = document.getElementById('modal-confirm');
@@ -4435,7 +4524,7 @@ function showAddSafetyModal() {
             const severity = severitySelect.value;
 
             if (!name || !identifier) {
-                alert('Please fill in all required fields');
+                alert(window.i18n.t('pleaseFillinRequired'));
                 return;
             }
 
@@ -4470,7 +4559,7 @@ function showAddToolModal() {
     const modalContent = `
         <div class="add-tool-modal-form">
             <div class="form-group">
-                <label for="modal-tool-name" class="form-label required">Tool Name</label>
+                <label for="modal-tool-name" class="form-label required">${window.i18n.t('toolName')}</label>
                 <input
                     type="text"
                     id="modal-tool-name"
@@ -4481,7 +4570,7 @@ function showAddToolModal() {
             </div>
 
             <div class="form-group">
-                <label for="modal-tool-identifier" class="form-label required">Tool Identifier</label>
+                <label for="modal-tool-identifier" class="form-label required">${window.i18n.t('toolIdentifier')}</label>
                 <input
                     type="text"
                     id="modal-tool-identifier"
@@ -4492,7 +4581,7 @@ function showAddToolModal() {
             </div>
 
             <div class="form-group">
-                <label for="modal-tool-size" class="form-label">Size/Specification</label>
+                <label for="modal-tool-size" class="form-label">${window.i18n.t('sizeSpecification')}</label>
                 <input
                     type="text"
                     id="modal-tool-size"
@@ -4502,31 +4591,31 @@ function showAddToolModal() {
             </div>
 
             <div class="form-group">
-                <label for="modal-tool-specifications" class="form-label">Additional Specifications</label>
+                <label for="modal-tool-specifications" class="form-label">${window.i18n.t('additionalSpecifications')}</label>
                 <textarea
                     id="modal-tool-specifications"
                     class="form-textarea"
-                    placeholder="Any additional tool specifications or requirements..."
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="3"
                 ></textarea>
             </div>
 
             <div class="form-group">
-                <label for="modal-tool-category" class="form-label">Category</label>
+                <label for="modal-tool-category" class="form-label">${window.i18n.t('category')}</label>
                 <select id="modal-tool-category" class="form-select">
-                    <option value="Hand Tools">Hand Tools</option>
-                    <option value="Power Tools">Power Tools</option>
-                    <option value="Measuring">Measuring Tools</option>
-                    <option value="Cutting">Cutting Tools</option>
-                    <option value="Assembly">Assembly Tools</option>
-                    <option value="Testing">Testing Equipment</option>
-                    <option value="General">General Tools</option>
+                    <option value="Hand Tools">${window.i18n.t('handTools')}</option>
+                    <option value="Power Tools">${window.i18n.t('powerTools')}</option>
+                    <option value="Measuring">${window.i18n.t('measuringTools')}</option>
+                    <option value="Cutting">${window.i18n.t('cuttingTools')}</option>
+                    <option value="Assembly">${window.i18n.t('assemblyTools')}</option>
+                    <option value="Testing">${window.i18n.t('testingEquipment')}</option>
+                    <option value="General">${window.i18n.t('generalTools')}</option>
                 </select>
             </div>
         </div>
     `;
 
-    showModal('Add Tool', modalContent, true);
+    showModal(window.i18n.t('addTool'), modalContent, true);
 
     // Override confirm button behavior
     const confirmButton = document.getElementById('modal-confirm');
@@ -4545,7 +4634,7 @@ function showAddToolModal() {
             const category = categorySelect.value;
 
             if (!name || !identifier) {
-                alert('Please fill in all required fields');
+                alert(window.i18n.t('pleaseFillinRequired'));
                 return;
             }
 
@@ -4578,7 +4667,7 @@ function showAddFixtureModal() {
     const modalContent = `
         <div class="add-fixture-modal-form">
             <div class="form-group">
-                <label for="modal-fixture-name" class="form-label required">Fixture Name</label>
+                <label for="modal-fixture-name" class="form-label required">${window.i18n.t('fixtureName')}</label>
                 <input
                     type="text"
                     id="modal-fixture-name"
@@ -4589,7 +4678,7 @@ function showAddFixtureModal() {
             </div>
 
             <div class="form-group">
-                <label for="modal-fixture-identifier" class="form-label required">Fixture Identifier</label>
+                <label for="modal-fixture-identifier" class="form-label required">${window.i18n.t('fixtureIdentifier')}</label>
                 <input
                     type="text"
                     id="modal-fixture-identifier"
@@ -4600,31 +4689,31 @@ function showAddFixtureModal() {
             </div>
 
             <div class="form-group">
-                <label for="modal-fixture-description" class="form-label">Description</label>
+                <label for="modal-fixture-description" class="form-label">${window.i18n.t('description')}</label>
                 <textarea
                     id="modal-fixture-description"
                     class="form-textarea"
-                    placeholder="Describe the fixture and its purpose..."
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="3"
                 ></textarea>
             </div>
 
             <div class="form-group">
-                <label for="modal-fixture-category" class="form-label">Category</label>
+                <label for="modal-fixture-category" class="form-label">${window.i18n.t('category')}</label>
                 <select id="modal-fixture-category" class="form-select">
-                    <option value="Assembly">Assembly Fixtures</option>
-                    <option value="Testing">Testing Fixtures</option>
-                    <option value="Holding">Holding Fixtures</option>
-                    <option value="Alignment">Alignment Fixtures</option>
-                    <option value="Welding">Welding Fixtures</option>
-                    <option value="Inspection">Inspection Fixtures</option>
-                    <option value="General">General Fixtures</option>
+                    <option value="Assembly">${window.i18n.t('assemblyFixtures')}</option>
+                    <option value="Testing">${window.i18n.t('testingFixtures')}</option>
+                    <option value="Holding">${window.i18n.t('holdingFixtures')}</option>
+                    <option value="Alignment">${window.i18n.t('alignmentFixtures')}</option>
+                    <option value="Welding">${window.i18n.t('weldingFixtures')}</option>
+                    <option value="Inspection">${window.i18n.t('inspectionFixtures')}</option>
+                    <option value="General">${window.i18n.t('generalFixtures')}</option>
                 </select>
             </div>
         </div>
     `;
 
-    showModal('Add Fixture', modalContent, true);
+    showModal(window.i18n.t('addFixture'), modalContent, true);
 
     // Override confirm button behavior
     const confirmButton = document.getElementById('modal-confirm');
@@ -4641,7 +4730,7 @@ function showAddFixtureModal() {
             const category = categorySelect.value;
 
             if (!name || !identifier) {
-                alert('Please fill in all required fields');
+                alert(window.i18n.t('pleaseFillinRequired'));
                 return;
             }
 
@@ -4822,8 +4911,8 @@ function updateAssemblyDisplay() {
     if (steps.length === 0) {
         assemblyContainer.innerHTML = `
             <div class="assembly-empty">
-                <p>No assembly steps defined yet</p>
-                <p class="assembly-help">Click "Add Assembly Step" to start documenting your assembly process</p>
+                <p>${window.i18n.t('noAssemblySteps') || 'No assembly steps defined yet'}</p>
+                <p class="assembly-help">${window.i18n.t('assemblyHelp') || 'Click "Add Assembly Step" to start documenting your assembly process'}</p>
             </div>
         `;
         return;
@@ -4850,84 +4939,84 @@ function updateAssemblyDisplay() {
         return `
             <div class="assembly-step" data-step-id="${step.id}">
                 <div class="assembly-step-header">
-                    <div class="assembly-step-number">Step ${step.stepNumber}</div>
+                    <div class="assembly-step-number">${window.i18n.t('progressStep')} ${step.stepNumber}</div>
                     <div class="assembly-step-controls">
-                        <button type="button" class="step-control-btn" onclick="moveAssemblyStep('${step.id}', 'up')" 
-                                ${index === 0 ? 'disabled' : ''} aria-label="Move step up">
+                        <button type="button" class="step-control-btn" onclick="moveAssemblyStep('${step.id}', 'up')"
+                                ${index === 0 ? 'disabled' : ''} aria-label="${window.i18n.t('moveStepUp') || 'Move step up'}">
                             <span aria-hidden="true">↑</span>
                         </button>
-                        <button type="button" class="step-control-btn" onclick="moveAssemblyStep('${step.id}', 'down')" 
-                                ${index === steps.length - 1 ? 'disabled' : ''} aria-label="Move step down">
+                        <button type="button" class="step-control-btn" onclick="moveAssemblyStep('${step.id}', 'down')"
+                                ${index === steps.length - 1 ? 'disabled' : ''} aria-label="${window.i18n.t('moveStepDown') || 'Move step down'}">
                             <span aria-hidden="true">↓</span>
                         </button>
-                        <button type="button" class="step-control-btn step-edit-btn" onclick="editAssemblyStep('${step.id}')" aria-label="Edit step">
+                        <button type="button" class="step-control-btn step-edit-btn" onclick="editAssemblyStep('${step.id}')" aria-label="${window.i18n.t('editStep') || 'Edit step'}">
                             <span aria-hidden="true">✏️</span>
                         </button>
-                        <button type="button" class="step-control-btn step-remove-btn" onclick="removeAssemblyStep('${step.id}')" aria-label="Remove step">
+                        <button type="button" class="step-control-btn step-remove-btn" onclick="removeAssemblyStep('${step.id}')" aria-label="${window.i18n.t('removeStep') || 'Remove step'}">
                             <span aria-hidden="true">×</span>
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="assembly-step-body">
-                    <div class="assembly-step-image" onclick="changeStepImage('${step.id}')" style="cursor: pointer;" title="Click to add/change image">
+                    <div class="assembly-step-image" onclick="changeStepImage('${step.id}')" style="cursor: pointer;" title="${window.i18n.t('clickToAddChangeImage') || 'Click to add/change image'}">
                         ${step.image ? `
-                            <img src="${step.image}" alt="Step ${step.stepNumber} image" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md);">
+                            <img src="${step.image}" alt="${window.i18n.t('progressStep')} ${step.stepNumber} image" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md);">
                             <div class="image-overlay">
-                                <span class="image-overlay-text">Click to change</span>
+                                <span class="image-overlay-text">${window.i18n.t('clickToChange')}</span>
                             </div>
                         ` : `
                             <div class="image-placeholder">
                                 <span class="image-placeholder-icon">📷</span>
-                                <span class="image-placeholder-text">Click to add image</span>
+                                <span class="image-placeholder-text">${window.i18n.t('clickToAddImage')}</span>
                             </div>
                         `}
                     </div>
-                    
+
                     <div class="assembly-step-content">
                         <div class="assembly-step-description">
-                            <strong>Description:</strong> ${step.description}
+                            <strong>${window.i18n.t('description')}:</strong> ${step.description}
                         </div>
-                        
+
                         ${step.parts.length > 0 ? `
                             <div class="assembly-step-parts">
-                                <strong>Parts:</strong> ${parts}
+                                <strong>${window.i18n.t('partsUsed')}:</strong> ${parts}
                             </div>
                         ` : ''}
-                        
+
                         ${step.tools.length > 0 ? `
                             <div class="assembly-step-tools">
-                                <strong>Tools:</strong> ${tools}
+                                <strong>${window.i18n.t('toolsRequired')}:</strong> ${tools}
                             </div>
                         ` : ''}
-                        
+
                         ${step.fixtures.length > 0 ? `
                             <div class="assembly-step-fixtures">
-                                <strong>Fixtures:</strong> ${fixtures}
+                                <strong>${window.i18n.t('fixturesRequired')}:</strong> ${fixtures}
                             </div>
                         ` : ''}
-                        
+
                         ${safety ? `
                             <div class="assembly-step-safety">
-                                <strong>Safety:</strong> ${safety}
+                                <strong>${window.i18n.t('safetyRequirements')}:</strong> ${safety}
                             </div>
                         ` : ''}
-                        
+
                         ${step.estimatedTime > 0 ? `
                             <div class="assembly-step-time">
-                                <strong>Estimated Time:</strong> ${step.estimatedTime} minutes
+                                <strong>${window.i18n.t('estimatedTime')}:</strong> ${step.estimatedTime} ${window.i18n.t('minutes')}
                             </div>
                         ` : ''}
-                        
+
                         ${step.qualityCheck ? `
                             <div class="assembly-step-quality">
-                                <strong>Quality Check:</strong> ${step.qualityDescription || 'Required'}
+                                <strong>${window.i18n.t('qualityCheck') || 'Quality Check'}:</strong> ${step.qualityDescription || window.i18n.t('required')}
                             </div>
                         ` : ''}
-                        
+
                         ${step.notes ? `
                             <div class="assembly-step-notes">
-                                <strong>Notes:</strong> ${step.notes}
+                                <strong>${window.i18n.t('additionalNotes')}:</strong> ${step.notes}
                             </div>
                         ` : ''}
                     </div>
@@ -4941,6 +5030,13 @@ function updateAssemblyDisplay() {
  * Load existing assembly data into the display
  */
 function loadAssemblyData() {
+    updateAssemblyDisplay();
+}
+
+/**
+ * Update assembly steps display for language changes
+ */
+function updateAssemblyStepsDisplay() {
     updateAssemblyDisplay();
 }
 
@@ -4972,18 +5068,18 @@ function showAddAssemblyStepModal() {
     const modalContent = `
         <div class="assembly-step-modal-form">
             <div class="form-group">
-                <label for="modal-step-description" class="form-label required">Step Description</label>
+                <label for="modal-step-description" class="form-label required">${window.i18n.t('stepDescription')}</label>
                 <textarea
                     id="modal-step-description"
                     class="form-textarea"
-                    placeholder="Describe what needs to be done in this step..."
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="3"
                     required
                 ></textarea>
             </div>
 
             <div class="form-group">
-                <label for="modal-step-image" class="form-label">Step Image</label>
+                <label for="modal-step-image" class="form-label">${window.i18n.t('stepImage') || 'Step Image'}</label>
                 <input
                     type="file"
                     id="modal-step-image"
@@ -4991,99 +5087,99 @@ function showAddAssemblyStepModal() {
                     accept="image/*"
                     aria-describedby="modal-step-image-help"
                 >
-                <small id="modal-step-image-help" class="form-help">Upload an image to illustrate this assembly step (optional)</small>
+                <small id="modal-step-image-help" class="form-help">${window.i18n.t('stepImageHelp') || 'Upload an image to illustrate this assembly step (optional)'}</small>
                 <div id="modal-step-image-preview" class="image-preview" style="display: none;">
                     <img id="modal-step-image-preview-img" src="" alt="Step image preview" style="max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 8px;">
-                    <button type="button" id="modal-step-image-remove" class="remove-image-btn" style="margin-left: 8px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                    <button type="button" id="modal-step-image-remove" class="remove-image-btn" style="margin-left: 8px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">${window.i18n.t('removeImage')}</button>
                 </div>
             </div>
-            
+
             <div class="form-group">
-                <label for="modal-step-parts" class="form-label">Parts Used</label>
+                <label for="modal-step-parts" class="form-label">${window.i18n.t('partsUsed') || 'Parts Used'}</label>
                 <select id="modal-step-parts" class="form-select" multiple>
                     ${partOptions}
                 </select>
-                <small class="form-help">Hold Ctrl/Cmd to select multiple parts</small>
+                <small class="form-help">${window.i18n.t('multiSelectHelp') || 'Hold Ctrl/Cmd to select multiple parts'}</small>
             </div>
-            
+
             <div class="form-group">
-                <label for="modal-step-tools" class="form-label">Tools Required</label>
+                <label for="modal-step-tools" class="form-label">${window.i18n.t('toolsRequired') || 'Tools Required'}</label>
                 <select id="modal-step-tools" class="form-select" multiple>
                     ${toolOptions}
                 </select>
-                <small class="form-help">Hold Ctrl/Cmd to select multiple tools</small>
+                <small class="form-help">${window.i18n.t('multiSelectHelp') || 'Hold Ctrl/Cmd to select multiple tools'}</small>
             </div>
-            
+
             <div class="form-group">
-                <label for="modal-step-fixtures" class="form-label">Fixtures Required</label>
+                <label for="modal-step-fixtures" class="form-label">${window.i18n.t('fixturesRequired') || 'Fixtures Required'}</label>
                 <select id="modal-step-fixtures" class="form-select" multiple>
                     ${fixtureOptions}
                 </select>
-                <small class="form-help">Hold Ctrl/Cmd to select multiple fixtures</small>
+                <small class="form-help">${window.i18n.t('multiSelectHelp') || 'Hold Ctrl/Cmd to select multiple fixtures'}</small>
             </div>
-            
+
             <div class="form-group">
-                <label for="modal-step-safety" class="form-label">Safety Requirements</label>
+                <label for="modal-step-safety" class="form-label">${window.i18n.t('safetyRequirements') || 'Safety Requirements'}</label>
                 <select id="modal-step-safety" class="form-select" multiple>
                     ${safetyOptions}
                 </select>
-                <small class="form-help">Hold Ctrl/Cmd to select multiple safety items</small>
+                <small class="form-help">${window.i18n.t('multiSelectHelp') || 'Hold Ctrl/Cmd to select multiple safety items'}</small>
             </div>
-            
+
             <div class="form-group">
-                <label for="modal-step-safety-text" class="form-label">Additional Safety Notes</label>
-                <textarea 
-                    id="modal-step-safety-text" 
-                    class="form-textarea" 
-                    placeholder="Add any additional safety requirements as free text..."
+                <label for="modal-step-safety-text" class="form-label">${window.i18n.t('additionalSafetyNotes') || 'Additional Safety Notes'}</label>
+                <textarea
+                    id="modal-step-safety-text"
+                    class="form-textarea"
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="2"
                 ></textarea>
             </div>
-            
+
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="modal-step-time" class="form-label">Estimated Time (minutes)</label>
-                    <input 
-                        type="number" 
-                        id="modal-step-time" 
-                        class="form-input" 
-                        min="0" 
+                    <label for="modal-step-time" class="form-label">${window.i18n.t('estimatedTime')} (${window.i18n.t('minutes')})</label>
+                    <input
+                        type="number"
+                        id="modal-step-time"
+                        class="form-input"
+                        min="0"
                         max="999"
                         placeholder="0"
                     >
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">
                         <input type="checkbox" id="modal-step-quality" class="form-checkbox">
-                        Quality Check Required
+                        ${window.i18n.t('qualityCheckRequired') || 'Quality Check Required'}
                     </label>
                 </div>
             </div>
-            
+
             <div class="form-group" id="quality-description-group" style="display: none;">
-                <label for="modal-step-quality-desc" class="form-label">Quality Check Description</label>
-                <textarea 
-                    id="modal-step-quality-desc" 
-                    class="form-textarea" 
-                    placeholder="Describe the quality check requirements..."
+                <label for="modal-step-quality-desc" class="form-label">${window.i18n.t('qualityCheckDescription') || 'Quality Check Description'}</label>
+                <textarea
+                    id="modal-step-quality-desc"
+                    class="form-textarea"
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="2"
                 ></textarea>
             </div>
-            
+
             <div class="form-group">
-                <label for="modal-step-notes" class="form-label">Additional Notes</label>
-                <textarea 
-                    id="modal-step-notes" 
-                    class="form-textarea" 
-                    placeholder="Any additional notes or special instructions..."
+                <label for="modal-step-notes" class="form-label">${window.i18n.t('additionalNotes') || 'Additional Notes'}</label>
+                <textarea
+                    id="modal-step-notes"
+                    class="form-textarea"
+                    placeholder="${window.i18n.t('enterDescription')}"
                     rows="2"
                 ></textarea>
             </div>
         </div>
     `;
     
-    showModal('Add Assembly Step', modalContent, true);
+    showModal(window.i18n.t('addAssemblyStep'), modalContent, true);
     
     // Setup quality check toggle
     const qualityCheckbox = document.getElementById('modal-step-quality');
@@ -5139,7 +5235,7 @@ function showAddAssemblyStepModal() {
             const imageFile = imageInput.files[0];
             
             if (!description) {
-                alert('Please provide a step description');
+                alert(window.i18n.t('pleaseProvideDescription') || 'Please provide a step description');
                 return;
             }
             
@@ -5303,7 +5399,7 @@ function editAssemblyStep(stepId) {
                 const notes = document.getElementById('modal-step-notes').value.trim();
                 
                 if (!description) {
-                    alert('Please provide a step description');
+                    alert(window.i18n.t('pleaseProvideDescription') || 'Please provide a step description');
                     return;
                 }
                 
@@ -5375,7 +5471,15 @@ function validateAssemblyForm() {
 }
 
 // Initialize the application when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeApp);
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+
+    // Initialize i18n after DOM is ready
+    if (window.i18n) {
+        window.i18n.updateUI();
+        setupLanguageSelector();
+    }
+});
 
 // Handle window resize for responsive behavior
 window.addEventListener('resize', () => {
