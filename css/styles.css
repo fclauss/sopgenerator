@@ -5,6 +5,7 @@
     /* Optimal AI Brand Colors */
     --color-primary: #055263;
     --color-primary-light: #3a7d8c;
+    --color-primary-dark: #044052;
     --color-accent: #ff7d3b;
     --color-accent-dark: #e66a28;
     
@@ -25,6 +26,7 @@
     
     /* Typography */
     --font-family-primary: 'Roboto', Arial, sans-serif;
+    --font-family-mono: 'Courier New', Consolas, monospace;
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-base: 1rem;
@@ -257,20 +259,25 @@ body {
 .nav-list {
     display: flex;
     list-style: none;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     margin: 0;
     padding: 0;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 
 .nav-link {
     color: var(--color-surface);
     text-decoration: none;
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
     transition: var(--transition-normal);
     font-weight: var(--font-weight-medium);
     font-size: var(--font-size-sm);
     position: relative;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 .nav-link:hover,
@@ -965,6 +972,67 @@ body {
     }
 }
 
+/* Compact navigation for smaller screens */
+@media (max-width: 1200px) and (min-width: 769px) {
+    .header-container {
+        max-width: 100%;
+        padding: 0 var(--spacing-md);
+    }
+
+    .nav-list {
+        gap: var(--spacing-xs);
+    }
+
+    .nav-link {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        font-size: 0.8rem;
+    }
+
+    .nav-link-database {
+        margin-right: var(--spacing-xs);
+        padding: var(--spacing-sm) var(--spacing-sm);
+    }
+
+    .nav-link-database::before {
+        margin-right: var(--spacing-xs);
+        font-size: 0.8rem;
+    }
+
+    .nav-link-company {
+        margin-left: 0 !important;
+        padding: var(--spacing-sm) var(--spacing-sm) !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* Medium screens (13" laptops, tablets in landscape) */
+@media (max-width: 1366px) and (min-width: 1201px) {
+    .header-container {
+        max-width: 100%;
+        padding: 0 var(--spacing-md);
+    }
+
+    .nav-list {
+        gap: var(--spacing-sm);
+    }
+
+    .nav-link {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.85rem;
+    }
+
+    .nav-link-database {
+        margin-right: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .nav-link-company {
+        margin-left: var(--spacing-xs) !important;
+        padding: var(--spacing-sm) var(--spacing-md) !important;
+        font-size: 0.85rem !important;
+    }
+}
+
 @media (max-width: 768px) {
     .header {
         padding: var(--spacing-md) var(--spacing-lg);
@@ -1202,26 +1270,62 @@ body {
 
 /* Print styles */
 @media print {
+    /* Hide all non-SOP elements */
     .header,
     .navigation-controls,
     .preview-panel,
-    .footer {
-        display: none;
+    .footer,
+    .progress-section,
+    .form-section:not(#preview-section),
+    .sop-actions {
+        display: none !important;
     }
-    
+
+    /* Reset page layout */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: auto;
+        background: white;
+    }
+
     .main-content {
         padding: 0;
+        margin: 0;
+        background: white;
     }
-    
-    .form-section {
-        box-shadow: none;
-        border: 1px solid #000;
-        page-break-inside: avoid;
+
+    .container {
+        max-width: none;
+        margin: 0;
+        padding: 0;
     }
-    
-    .database-column {
-        box-shadow: none;
-        border: 1px solid #000;
+
+    /* Show only the SOP document */
+    #preview-section {
+        display: block !important;
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    #preview-section .section-header {
+        display: none !important;
+    }
+
+    #preview-section .section-content {
+        padding: 0;
+        margin: 0;
+    }
+
+    .sop-document {
+        display: block !important;
+        visibility: visible !important;
     }
 }
 
@@ -1439,8 +1543,8 @@ body {
     background: rgba(255, 125, 59, 0.15);
     border: 2px solid rgba(255, 125, 59, 0.3);
     border-radius: var(--radius-md);
-    margin-right: var(--spacing-xl);
-    padding: var(--spacing-md) var(--spacing-lg);
+    margin-right: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
     font-weight: var(--font-weight-semibold);
     position: relative;
 }
@@ -1463,6 +1567,26 @@ body {
     border-color: var(--color-accent);
     color: var(--color-surface);
     box-shadow: 0 0 0 2px rgba(255, 125, 59, 0.2);
+}
+
+/* Company Setup Button Styling */
+.nav-link-company {
+    background: rgba(5, 82, 99, 0.15) !important;
+    border: 2px solid rgba(5, 82, 99, 0.3) !important;
+    border-radius: var(--radius-md) !important;
+    margin-left: var(--spacing-xs) !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    cursor: pointer !important;
+    transition: all var(--transition-normal) !important;
+    font-size: var(--font-size-sm) !important;
+}
+
+.nav-link-company:hover,
+.nav-link-company:focus {
+    background: rgba(5, 82, 99, 0.25) !important;
+    border-color: rgba(5, 82, 99, 0.5) !important;
+    transform: translateY(-1px) !important;
 }
 
 /* Mock Data Controls Styles */
@@ -2205,6 +2329,54 @@ body {
     opacity: 0.8;
 }
 
+/* Image Overlay for Clickable Images */
+.assembly-step-image {
+    position: relative;
+    transition: var(--transition-normal);
+}
+
+.assembly-step-image:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-md);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-normal);
+    border-radius: var(--radius-md);
+}
+
+.assembly-step-image:hover .image-overlay {
+    opacity: 1;
+}
+
+.image-overlay-text {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    text-align: center;
+}
+
+/* Make image placeholder more obviously clickable */
+.image-placeholder {
+    transition: var(--transition-normal);
+    border: 2px dashed var(--color-border);
+}
+
+.assembly-step-image:hover .image-placeholder {
+    border-color: var(--color-primary);
+    background: rgba(5, 82, 99, 0.05);
+}
+
 /* Assembly Step Content */
 .assembly-step-content {
     flex: 1;
@@ -2357,23 +2529,330 @@ body {
         gap: var(--spacing-sm);
         align-items: flex-start;
     }
-    
+
     .assembly-step-controls {
         align-self: flex-end;
     }
-    
+
     .assembly-step-modal-form .form-select {
         font-size: var(--font-size-sm);
     }
-    
+
     /* Stack assembly step layout vertically on mobile */
     .assembly-step {
         flex-direction: column;
     }
-    
+
     .assembly-step-image {
         flex: none;
         width: 100%;
         height: 150px;
     }
-} 
+}
+
+/* SOP Document Styles */
+.sop-document {
+    background: white;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    font-family: 'Times New Roman', serif;
+    line-height: 1.6;
+    color: #000;
+    margin-bottom: var(--spacing-xl);
+}
+
+.sop-header {
+    text-align: center;
+    border-bottom: 3px solid #000;
+    padding-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.company-logo {
+    margin-bottom: var(--spacing-md);
+}
+
+.company-logo img {
+    max-height: 80px;
+    max-width: 200px;
+    object-fit: contain;
+}
+
+.company-address {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: #f9f9f9;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.sop-title-block h1 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0 0 var(--spacing-sm) 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sop-title-block h2 {
+    font-size: 1.4rem;
+    font-weight: normal;
+    margin: 0 0 var(--spacing-lg) 0;
+    color: var(--color-primary);
+}
+
+.sop-title-block h3 {
+    font-size: 1.1rem;
+    font-weight: normal;
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+.sop-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    text-align: left;
+}
+
+.sop-info-item {
+    padding: var(--spacing-sm);
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    font-size: 0.9rem;
+}
+
+.sop-info-item strong {
+    display: inline-block;
+    width: 100px;
+    font-weight: bold;
+}
+
+.sop-section {
+    margin-bottom: var(--spacing-2xl);
+}
+
+.sop-section h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0 0 var(--spacing-lg) 0;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: var(--spacing-sm);
+    color: var(--color-primary);
+}
+
+.sop-safety {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid var(--color-warning);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+}
+
+.safety-warning {
+    background: var(--color-warning);
+    color: white;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-md);
+    font-weight: bold;
+}
+
+.sop-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-md);
+    font-size: 0.9rem;
+}
+
+.sop-table th,
+.sop-table td {
+    border: 1px solid #000;
+    padding: var(--spacing-md);
+    text-align: left;
+    vertical-align: top;
+}
+
+.sop-table th {
+    background: #f0f0f0;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sop-assembly-table .sop-image-cell {
+    width: 40%;
+    text-align: center;
+    padding: var(--spacing-sm);
+}
+
+.sop-assembly-table .sop-step-cell {
+    width: 60%;
+    padding: var(--spacing-md);
+}
+
+.sop-image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    background: #f5f5f5;
+    border: 2px dashed #ccc;
+    border-radius: var(--radius-sm);
+    color: #666;
+}
+
+.sop-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    padding: var(--spacing-xl);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.sop-actions .button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Enhanced Print Styles for SOP */
+@media print {
+    .sop-actions {
+        display: none !important;
+    }
+
+    .sop-document {
+        box-shadow: none;
+        padding: 20mm;
+        margin: 0;
+        background: white;
+        font-size: 11pt;
+        line-height: 1.4;
+        color: black;
+        page-break-before: auto;
+    }
+
+    .sop-header {
+        page-break-after: avoid;
+        margin-bottom: 20pt;
+    }
+
+    .sop-title-block h1 {
+        font-size: 18pt;
+        margin-bottom: 8pt;
+    }
+
+    .sop-title-block h2 {
+        font-size: 14pt;
+        margin-bottom: 12pt;
+    }
+
+    .sop-info-grid {
+        font-size: 9pt;
+        margin-bottom: 16pt;
+    }
+
+    .sop-section {
+        page-break-inside: avoid;
+        margin-bottom: 16pt;
+    }
+
+    .sop-section h3 {
+        font-size: 12pt;
+        page-break-after: avoid;
+        margin-bottom: 8pt;
+    }
+
+    .sop-table {
+        font-size: 9pt;
+        page-break-inside: avoid;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .sop-table th,
+    .sop-table td {
+        border: 1pt solid black;
+        padding: 4pt 6pt;
+    }
+
+    .sop-table th {
+        background: #f0f0f0 !important;
+        font-weight: bold;
+    }
+
+    .sop-assembly-table img {
+        max-height: 80pt;
+        max-width: 100%;
+        height: auto;
+    }
+
+    .sop-assembly-table .sop-image-cell {
+        width: 35%;
+        vertical-align: top;
+    }
+
+    .sop-assembly-table .sop-step-cell {
+        width: 65%;
+        vertical-align: top;
+    }
+
+    .sop-image-placeholder {
+        height: 60pt;
+        font-size: 8pt;
+    }
+
+    .safety-warning {
+        background: #ffeb3b !important;
+        color: black !important;
+        border: 1pt solid black;
+    }
+
+    /* Page break controls */
+    .sop-section:nth-of-type(n+3) {
+        page-break-before: auto;
+    }
+
+    /* Ensure tables don't break awkwardly */
+    .sop-table tbody tr {
+        page-break-inside: avoid;
+    }
+}
+
+/* Responsive SOP Styles */
+@media (max-width: 768px) {
+    .sop-document {
+        padding: var(--spacing-lg);
+        font-size: 0.9rem;
+    }
+
+    .sop-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sop-actions {
+        flex-direction: column;
+    }
+
+    .sop-table {
+        font-size: 0.8rem;
+    }
+
+    .sop-table th,
+    .sop-table td {
+        padding: var(--spacing-sm);
+    }
+}

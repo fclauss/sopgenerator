@@ -180,6 +180,7 @@ class AssemblyStep {
         this.qualityDescription = data.qualityDescription || '';
         this.notes = data.notes || '';
         this.estimatedTime = data.estimatedTime || 0; // in minutes
+        this.image = data.image || null; // Base64 encoded image data
         this.createdAt = data.createdAt || new Date().toISOString();
         this.updatedAt = data.updatedAt || new Date().toISOString();
         
@@ -261,6 +262,7 @@ class AssemblyStep {
             qualityDescription: this.qualityDescription,
             notes: this.notes,
             estimatedTime: this.estimatedTime,
+            image: this.image,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
         };
@@ -866,7 +868,10 @@ class StateManager {
             
             // Current SOP being created/edited
             currentSOP: new SOP(),
-            
+
+            // Company data
+            companyData: {},
+
             // UI state
             currentSection: 0,
             isDirty: false, // Has unsaved changes
@@ -1156,6 +1161,23 @@ class StateManager {
         this.markDirty();
         this.emit('sopReset', this.state.currentSOP);
     }
+
+    // Company data operations
+    setCompanyData(companyData) {
+        this.state.companyData = { ...companyData };
+        this.markDirty();
+        this.emit('companyDataUpdated', this.state.companyData);
+    }
+
+    getCompanyData() {
+        return this.state.companyData || {};
+    }
+
+    clearCompanyData() {
+        this.state.companyData = {};
+        this.markDirty();
+        this.emit('companyDataCleared');
+    }
     
     // Search and filter operations
     setSearchFilter(type, filter) {
@@ -1234,6 +1256,7 @@ class StateManager {
                 fixtures: Array.from(this.state.fixtures.entries()),
                 safety: Array.from(this.state.safety.entries()),
                 currentSOP: this.state.currentSOP.toJSON(),
+                companyData: this.state.companyData,
                 lastSaved: new Date().toISOString()
             };
             
@@ -1302,7 +1325,12 @@ class StateManager {
             if (data.currentSOP) {
                 this.state.currentSOP = new SOP(data.currentSOP);
             }
-            
+
+            // Load company data
+            if (data.companyData) {
+                this.state.companyData = data.companyData;
+            }
+
             this.state.lastSaved = data.lastSaved;
             
             // Emit events for successful load
@@ -2646,22 +2674,24 @@ function handleKeyboardNavigation(e) {
 }
 
 /**
- * Generate SOP (placeholder function)
+ * Generate SOP with actual content
  */
 function generateSOP() {
-    console.log('Generate SOP clicked - functionality will be implemented in later tasks');
-    
+    console.log('Generate SOP clicked - generating actual content');
+
     // Show loading state
     showLoading();
-    
-    // Simulate processing
+
+    // Simulate processing time for better UX
     setTimeout(() => {
         hideLoading();
-        openPreviewPanel();
-        
-        // Update preview content (basic placeholder)
-        updatePreviewContent();
-    }, 1000);
+
+        // Navigate to preview section instead of opening side panel
+        navigateToSection(4); // Preview section is index 4
+
+        // Generate and display actual SOP content
+        generateActualSOPContent();
+    }, 800);
 }
 
 /**
@@ -2685,29 +2715,556 @@ function hideLoading() {
 }
 
 /**
- * Update preview content (placeholder)
+ * Generate actual SOP content and display in preview section
  */
-function updatePreviewContent() {
-    const previewContent = document.getElementById('preview-sop-content');
-    if (previewContent) {
-        previewContent.innerHTML = `
+function generateActualSOPContent() {
+    const currentSOP = stateManager.getCurrentSOP();
+    const previewSection = document.getElementById('preview-section');
+
+    if (!previewSection) {
+        console.error('Preview section not found');
+        return;
+    }
+
+    // Generate comprehensive SOP HTML
+    const sopHTML = generateSOPHTML(currentSOP);
+
+    // Replace the preview section content
+    previewSection.innerHTML = `
+        <header class="section-header">
+            <h2 class="section-title">
+                <span class="section-number">📄</span>
+                Generated SOP Document
+            </h2>
+            <p class="section-description">Your complete Standard Operating Procedure</p>
+        </header>
+        <div class="section-content">
+            <div class="sop-document">
+                ${sopHTML}
+            </div>
+            <div class="sop-actions">
+                <button type="button" class="button button--primary" onclick="printSOP()">
+                    <span aria-hidden="true">🖨️</span> Print SOP
+                </button>
+                <button type="button" class="button button--secondary" onclick="exportSOP()">
+                    <span aria-hidden="true">💾</span> Export PDF
+                </button>
+                <button type="button" class="button button--secondary" onclick="editSOP()">
+                    <span aria-hidden="true">✏️</span> Edit SOP
+                </button>
+            </div>
+        </div>
+    `;
+
+    console.log('SOP content generated and displayed');
+}
+
+/**
+ * Generate comprehensive SOP HTML content
+ */
+function generateSOPHTML(sop) {
+    const currentDate = new Date().toLocaleDateString();
+    const parts = stateManager.getAllParts();
+    const tools = stateManager.getAllTools();
+    const fixtures = stateManager.getAllFixtures();
+    const safetyItems = stateManager.getAllSafety();
+    const companyData = stateManager.getCompanyData();
+
+    // Generate BOM table
+    const bomHTML = generateBOMTable(sop, parts);
+
+    // Generate safety requirements
+    const safetyHTML = generateSafetySection(sop, safetyItems);
+
+    // Generate assembly steps table
+    const assemblyHTML = generateAssemblyStepsTable(sop, parts, tools, fixtures);
+
+    return `
+        <div class="sop-header">
+            ${companyData.logo ? `
+                <div class="company-logo">
+                    <img src="${companyData.logo}" alt="${companyData.name || 'Company'} logo" style="max-height: 80px; max-width: 200px;">
+                </div>
+            ` : ''}
+            <div class="sop-title-block">
+                <h1>STANDARD OPERATING PROCEDURE</h1>
+                <h2>${sop.title || 'Assembly Procedure'}</h2>
+                ${companyData.name ? `<h3>${companyData.name}</h3>` : ''}
+            </div>
+            <div class="sop-info-grid">
+                <div class="sop-info-item">
+                    <strong>Part Number:</strong> ${sop.partNumber || 'N/A'}
+                </div>
+                <div class="sop-info-item">
+                    <strong>Revision:</strong> ${sop.revision || 'A'}
+                </div>
+                <div class="sop-info-item">
+                    <strong>Author:</strong> ${sop.author || 'N/A'}
+                </div>
+                <div class="sop-info-item">
+                    <strong>Department:</strong> ${sop.department || 'N/A'}
+                </div>
+                <div class="sop-info-item">
+                    <strong>Approver:</strong> ${sop.approver || 'N/A'}
+                </div>
+                <div class="sop-info-item">
+                    <strong>Effective Date:</strong> ${sop.effectiveDate || currentDate}
+                </div>
+                <div class="sop-info-item">
+                    <strong>Generated:</strong> ${currentDate}
+                </div>
+                <div class="sop-info-item">
+                    <strong>Total Time:</strong> ${sop.estimatedTotalTime || 0} minutes
+                </div>
+                ${companyData.phone ? `
+                    <div class="sop-info-item">
+                        <strong>Phone:</strong> ${companyData.phone}
+                    </div>
+                ` : ''}
+                ${companyData.email ? `
+                    <div class="sop-info-item">
+                        <strong>Email:</strong> ${companyData.email}
+                    </div>
+                ` : ''}
+            </div>
+            ${companyData.address ? `
+                <div class="company-address">
+                    <strong>Address:</strong> ${companyData.address}
+                </div>
+            ` : ''}
+        </div>
+
+        ${sop.notes ? `
+            <div class="sop-section">
+                <h3>GENERAL NOTES</h3>
+                <p>${sop.notes}</p>
+            </div>
+        ` : ''}
+
+        <div class="sop-section">
             <h3>SCOPE</h3>
-            <p>This procedure describes the assembly process for the selected components.</p>
-            
-            <h3>SAFETY REQUIREMENTS</h3>
-            <p>⚠️ <strong>WARNING:</strong> Follow all safety guidelines during assembly.</p>
-            
-            <h3>BILL OF MATERIALS</h3>
-            <ul>
-                <li>Parts will be listed here based on BOM section</li>
-            </ul>
-            
-            <h3>ASSEMBLY STEPS</h3>
-            <p>Assembly steps will be generated based on the documented sequence.</p>
-            
-            <p><em>Complete all form sections to generate a full SOP preview.</em></p>
+            <p>This Standard Operating Procedure describes the assembly process for ${sop.title || 'the specified components'}.
+            Follow all steps in sequence and adhere to safety requirements throughout the process.</p>
+        </div>
+
+        ${safetyHTML}
+
+        ${bomHTML}
+
+        ${assemblyHTML}
+    `;
+}
+
+/**
+ * Generate BOM table HTML
+ */
+function generateBOMTable(sop, allParts) {
+    if (!sop.bom || sop.bom.length === 0) {
+        return `
+            <div class="sop-section">
+                <h3>BILL OF MATERIALS</h3>
+                <p><em>No parts specified in BOM</em></p>
+            </div>
         `;
     }
+
+    const bomRows = sop.bom.map((bomItem, index) => {
+        const part = allParts.find(p => p.id === bomItem.partId);
+        if (!part) return '';
+
+        return `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${part.partNumber}</td>
+                <td>${part.name}</td>
+                <td>${part.description || 'N/A'}</td>
+                <td>${bomItem.quantity}</td>
+                <td>${part.category || 'General'}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <div class="sop-section">
+            <h3>BILL OF MATERIALS</h3>
+            <table class="sop-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Part Number</th>
+                        <th>Description</th>
+                        <th>Specifications</th>
+                        <th>Qty</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${bomRows}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+/**
+ * Generate safety section HTML
+ */
+function generateSafetySection(sop, allSafetyItems) {
+    let safetyContent = '';
+
+    // Add safety items from database
+    if (sop.safety && sop.safety.length > 0) {
+        const safetyList = sop.safety.map(safetyReq => `<li>${safetyReq}</li>`).join('');
+        safetyContent += `<ul>${safetyList}</ul>`;
+    }
+
+    // Add general safety note
+    if (!safetyContent) {
+        safetyContent = '<p><em>No specific safety requirements defined. Follow general workplace safety guidelines.</em></p>';
+    }
+
+    return `
+        <div class="sop-section sop-safety">
+            <h3>⚠️ SAFETY REQUIREMENTS</h3>
+            <div class="safety-warning">
+                <strong>WARNING:</strong> Ensure all safety requirements are met before beginning assembly.
+            </div>
+            ${safetyContent}
+        </div>
+    `;
+}
+
+/**
+ * Generate assembly steps table HTML
+ */
+function generateAssemblyStepsTable(sop, allParts, allTools, allFixtures) {
+    if (!sop.steps || sop.steps.length === 0) {
+        return `
+            <div class="sop-section">
+                <h3>ASSEMBLY PROCEDURE</h3>
+                <p><em>No assembly steps defined</em></p>
+            </div>
+        `;
+    }
+
+    const stepsRows = sop.steps.map(step => {
+        // Get part names
+        const partNames = step.parts.map(partRef => {
+            const part = allParts.find(p => p.id === partRef.partId);
+            return part ? `${part.name} (${partRef.quantity}x)` : 'Unknown part';
+        }).join(', ');
+
+        // Get tool names
+        const toolNames = step.tools.map(toolId => {
+            const tool = allTools.find(t => t.id === toolId);
+            return tool ? tool.name : 'Unknown tool';
+        }).join(', ');
+
+        // Get fixture names
+        const fixtureNames = step.fixtures.map(fixtureId => {
+            const fixture = allFixtures.find(f => f.id === fixtureId);
+            return fixture ? fixture.name : 'Unknown fixture';
+        }).join(', ');
+
+        // Combine tools and fixtures
+        const toolsAndFixtures = [toolNames, fixtureNames].filter(Boolean).join(', ');
+
+        // Build step content
+        let stepContent = `<strong>Step ${step.stepNumber}:</strong> ${step.description}`;
+
+        if (partNames) {
+            stepContent += `<br><br><strong>Parts:</strong> ${partNames}`;
+        }
+
+        if (toolsAndFixtures) {
+            stepContent += `<br><strong>Tools/Fixtures:</strong> ${toolsAndFixtures}`;
+        }
+
+        if (step.safety && step.safety.length > 0) {
+            stepContent += `<br><strong>Safety:</strong> ${step.safety.join(', ')}`;
+        }
+
+        if (step.qualityCheck && step.qualityDescription) {
+            stepContent += `<br><strong>Quality Check:</strong> ✓ ${step.qualityDescription}`;
+        }
+
+        if (step.estimatedTime > 0) {
+            stepContent += `<br><strong>Time:</strong> ${step.estimatedTime} minutes`;
+        }
+
+        if (step.notes) {
+            stepContent += `<br><strong>Notes:</strong> ${step.notes}`;
+        }
+
+        // Image column
+        const imageContent = step.image ?
+            `<img src="${step.image}" alt="Step ${step.stepNumber}" style="max-width: 100%; height: auto; border-radius: 4px;">` :
+            `<div class="sop-image-placeholder">
+                <span>📷</span><br>
+                <small>No Image</small>
+            </div>`;
+
+        return `
+            <tr>
+                <td class="sop-image-cell">${imageContent}</td>
+                <td class="sop-step-cell">${stepContent}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <div class="sop-section">
+            <h3>ASSEMBLY PROCEDURE</h3>
+            <table class="sop-table sop-assembly-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Image</th>
+                        <th style="width: 60%;">Assembly Step</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${stepsRows}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+/**
+ * Print SOP document
+ */
+function printSOP() {
+    window.print();
+}
+
+/**
+ * Export SOP as PDF (placeholder)
+ */
+function exportSOP() {
+    alert('PDF export functionality would be implemented here. For now, use Print and save as PDF.');
+}
+
+/**
+ * Edit SOP - go back to first section
+ */
+function editSOP() {
+    navigateToSection(0); // Go back to Basic Info section
+}
+
+/**
+ * Show company setup modal
+ */
+function showCompanySetup() {
+    const companyData = stateManager.getCompanyData();
+
+    const modalContent = `
+        <div class="company-setup-form">
+            <div class="form-group">
+                <label for="modal-company-name" class="form-label required">Company Name</label>
+                <input
+                    type="text"
+                    id="modal-company-name"
+                    class="form-input"
+                    placeholder="Enter your company name"
+                    value="${companyData.name || ''}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-company-logo" class="form-label">Company Logo</label>
+                <input
+                    type="file"
+                    id="modal-company-logo"
+                    class="form-input"
+                    accept="image/*"
+                    aria-describedby="modal-company-logo-help"
+                >
+                <small id="modal-company-logo-help" class="form-help">Upload your company logo (optional)</small>
+                <div id="modal-company-logo-preview" class="image-preview" style="display: ${companyData.logo ? 'block' : 'none'};">
+                    <img id="modal-company-logo-preview-img" src="${companyData.logo || ''}" alt="Company logo preview" style="max-width: 200px; max-height: 100px; border-radius: 4px; margin-top: 8px;">
+                    <button type="button" id="modal-company-logo-remove" class="remove-image-btn" style="margin-left: 8px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-company-address" class="form-label">Address</label>
+                <textarea
+                    id="modal-company-address"
+                    class="form-textarea"
+                    placeholder="Enter company address"
+                    rows="3"
+                >${companyData.address || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-company-phone" class="form-label">Phone</label>
+                <input
+                    type="tel"
+                    id="modal-company-phone"
+                    class="form-input"
+                    placeholder="Enter phone number"
+                    value="${companyData.phone || ''}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-company-email" class="form-label">Email</label>
+                <input
+                    type="email"
+                    id="modal-company-email"
+                    class="form-input"
+                    placeholder="Enter company email"
+                    value="${companyData.email || ''}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-company-website" class="form-label">Website</label>
+                <input
+                    type="url"
+                    id="modal-company-website"
+                    class="form-input"
+                    placeholder="Enter company website"
+                    value="${companyData.website || ''}"
+                >
+            </div>
+        </div>
+    `;
+
+    showModal('Company Setup', modalContent, true);
+
+    // Setup logo upload handling
+    setupCompanyLogoHandling();
+
+    // Override confirm button behavior
+    const confirmButton = document.getElementById('modal-confirm');
+    if (confirmButton) {
+        confirmButton.onclick = () => {
+            saveCompanyData();
+        };
+    }
+}
+
+/**
+ * Setup company logo upload handling
+ */
+function setupCompanyLogoHandling() {
+    const logoInput = document.getElementById('modal-company-logo');
+    const logoPreview = document.getElementById('modal-company-logo-preview');
+    const logoPreviewImg = document.getElementById('modal-company-logo-preview-img');
+    const logoRemoveBtn = document.getElementById('modal-company-logo-remove');
+
+    if (logoInput && logoPreview && logoPreviewImg && logoRemoveBtn) {
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    logoPreviewImg.src = e.target.result;
+                    logoPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        logoRemoveBtn.addEventListener('click', () => {
+            logoInput.value = '';
+            logoPreview.style.display = 'none';
+            logoPreviewImg.src = '';
+        });
+    }
+}
+
+/**
+ * Save company data
+ */
+function saveCompanyData() {
+    const nameInput = document.getElementById('modal-company-name');
+    const logoInput = document.getElementById('modal-company-logo');
+    const addressInput = document.getElementById('modal-company-address');
+    const phoneInput = document.getElementById('modal-company-phone');
+    const emailInput = document.getElementById('modal-company-email');
+    const websiteInput = document.getElementById('modal-company-website');
+    const logoPreviewImg = document.getElementById('modal-company-logo-preview-img');
+
+    const name = nameInput.value.trim();
+    const address = addressInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const email = emailInput.value.trim();
+    const website = websiteInput.value.trim();
+
+    if (!name) {
+        alert('Please enter a company name');
+        return;
+    }
+
+    // Handle logo
+    const logoFile = logoInput.files[0];
+    if (logoFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const companyData = {
+                name,
+                logo: e.target.result,
+                address,
+                phone,
+                email,
+                website
+            };
+
+            stateManager.setCompanyData(companyData);
+            hideModal();
+            console.log('Company data saved:', companyData);
+        };
+        reader.readAsDataURL(logoFile);
+    } else {
+        // Use existing logo if no new file selected
+        const existingLogo = logoPreviewImg.src && logoPreviewImg.src !== window.location.href ? logoPreviewImg.src : null;
+
+        const companyData = {
+            name,
+            logo: existingLogo,
+            address,
+            phone,
+            email,
+            website
+        };
+
+        stateManager.setCompanyData(companyData);
+        hideModal();
+        console.log('Company data saved:', companyData);
+    }
+}
+
+/**
+ * Change step image - show file picker for specific step
+ */
+function changeStepImage(stepId) {
+    // Create a hidden file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Update the step with the new image
+                updateAssemblyStep(stepId, { image: e.target.result });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Clean up
+        document.body.removeChild(fileInput);
+    });
+
+    // Add to DOM and trigger click
+    document.body.appendChild(fileInput);
+    fileInput.click();
 }
 
 /**
@@ -3402,6 +3959,11 @@ function setupBOMFormListeners() {
     if (addPartButton) {
         addPartButton.addEventListener('click', handleAddNewPart);
     }
+
+    // Setup database add buttons for all types
+    setupDatabaseAddButtons();
+
+    console.log('BOM form listeners setup complete with database buttons');
     
     // Load existing BOM data
     loadBOMData();
@@ -3445,10 +4007,56 @@ function handleAddBOMItem() {
 }
 
 /**
+ * Setup database add buttons for all database types
+ */
+function setupDatabaseAddButtons() {
+    // Setup safety add button
+    const addSafetyButton = document.querySelector('[data-database="safety"]');
+    if (addSafetyButton) {
+        addSafetyButton.addEventListener('click', handleAddNewSafety);
+    }
+
+    // Setup tools add button
+    const addToolButton = document.querySelector('[data-database="tools"]');
+    if (addToolButton) {
+        addToolButton.addEventListener('click', handleAddNewTool);
+    }
+
+    // Setup fixtures add button
+    const addFixtureButton = document.querySelector('[data-database="fixtures"]');
+    if (addFixtureButton) {
+        addFixtureButton.addEventListener('click', handleAddNewFixture);
+    }
+
+    console.log('Database add buttons setup complete');
+}
+
+/**
  * Handle adding a new part to the database
  */
 function handleAddNewPart() {
     showAddPartModal();
+}
+
+/**
+ * Handle adding a new safety item to the database
+ */
+function handleAddNewSafety() {
+    showAddSafetyModal();
+}
+
+/**
+ * Handle adding a new tool to the database
+ */
+function handleAddNewTool() {
+    showAddToolModal();
+}
+
+/**
+ * Handle adding a new fixture to the database
+ */
+function handleAddNewFixture() {
+    showAddFixtureModal();
 }
 
 /**
@@ -3746,6 +4354,319 @@ function showAddPartModal() {
 }
 
 /**
+ * Show modal for adding new safety item
+ */
+function showAddSafetyModal() {
+    const modalContent = `
+        <div class="add-safety-modal-form">
+            <div class="form-group">
+                <label for="modal-safety-name" class="form-label required">Safety Item Name</label>
+                <input
+                    type="text"
+                    id="modal-safety-name"
+                    class="form-input"
+                    placeholder="e.g., Safety Glasses"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-safety-identifier" class="form-label required">Identifier</label>
+                <input
+                    type="text"
+                    id="modal-safety-identifier"
+                    class="form-input"
+                    placeholder="e.g., PPE-001"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-safety-description" class="form-label">Description</label>
+                <textarea
+                    id="modal-safety-description"
+                    class="form-textarea"
+                    placeholder="Describe the safety requirement..."
+                    rows="3"
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-safety-category" class="form-label">Category</label>
+                <select id="modal-safety-category" class="form-select">
+                    <option value="PPE">Personal Protective Equipment</option>
+                    <option value="Environmental">Environmental Safety</option>
+                    <option value="Equipment">Equipment Safety</option>
+                    <option value="Chemical">Chemical Safety</option>
+                    <option value="Fire">Fire Safety</option>
+                    <option value="Medical">Medical/First Aid</option>
+                    <option value="General">General Safety</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-safety-severity" class="form-label">Severity Level</label>
+                <select id="modal-safety-severity" class="form-select">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
+        </div>
+    `;
+
+    showModal('Add Safety Item', modalContent, true);
+
+    // Override confirm button behavior
+    const confirmButton = document.getElementById('modal-confirm');
+    if (confirmButton) {
+        confirmButton.onclick = () => {
+            const nameInput = document.getElementById('modal-safety-name');
+            const identifierInput = document.getElementById('modal-safety-identifier');
+            const descriptionInput = document.getElementById('modal-safety-description');
+            const categorySelect = document.getElementById('modal-safety-category');
+            const severitySelect = document.getElementById('modal-safety-severity');
+
+            const name = nameInput.value.trim();
+            const identifier = identifierInput.value.trim();
+            const description = descriptionInput.value.trim();
+            const category = categorySelect.value;
+            const severity = severitySelect.value;
+
+            if (!name || !identifier) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Create new safety item
+            const newSafety = {
+                name,
+                identifier,
+                description: description || `${name} safety requirement`,
+                category,
+                severity,
+                pictogram: '⚠️' // Default pictogram
+            };
+
+            try {
+                const addedSafety = stateManager.addSafety(newSafety);
+                updateSafetyDatabase();
+                updateSafetySelector();
+
+                hideModal();
+                console.log('Added new safety item:', addedSafety);
+            } catch (error) {
+                alert('Error adding safety item: ' + error.message);
+            }
+        };
+    }
+}
+
+/**
+ * Show modal for adding new tool
+ */
+function showAddToolModal() {
+    const modalContent = `
+        <div class="add-tool-modal-form">
+            <div class="form-group">
+                <label for="modal-tool-name" class="form-label required">Tool Name</label>
+                <input
+                    type="text"
+                    id="modal-tool-name"
+                    class="form-input"
+                    placeholder="e.g., Phillips Screwdriver"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-tool-identifier" class="form-label required">Tool Identifier</label>
+                <input
+                    type="text"
+                    id="modal-tool-identifier"
+                    class="form-input"
+                    placeholder="e.g., TOOL-001"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-tool-size" class="form-label">Size/Specification</label>
+                <input
+                    type="text"
+                    id="modal-tool-size"
+                    class="form-input"
+                    placeholder="e.g., #2, 10mm, 1/4 inch"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-tool-specifications" class="form-label">Additional Specifications</label>
+                <textarea
+                    id="modal-tool-specifications"
+                    class="form-textarea"
+                    placeholder="Any additional tool specifications or requirements..."
+                    rows="3"
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-tool-category" class="form-label">Category</label>
+                <select id="modal-tool-category" class="form-select">
+                    <option value="Hand Tools">Hand Tools</option>
+                    <option value="Power Tools">Power Tools</option>
+                    <option value="Measuring">Measuring Tools</option>
+                    <option value="Cutting">Cutting Tools</option>
+                    <option value="Assembly">Assembly Tools</option>
+                    <option value="Testing">Testing Equipment</option>
+                    <option value="General">General Tools</option>
+                </select>
+            </div>
+        </div>
+    `;
+
+    showModal('Add Tool', modalContent, true);
+
+    // Override confirm button behavior
+    const confirmButton = document.getElementById('modal-confirm');
+    if (confirmButton) {
+        confirmButton.onclick = () => {
+            const nameInput = document.getElementById('modal-tool-name');
+            const identifierInput = document.getElementById('modal-tool-identifier');
+            const sizeInput = document.getElementById('modal-tool-size');
+            const specificationsInput = document.getElementById('modal-tool-specifications');
+            const categorySelect = document.getElementById('modal-tool-category');
+
+            const name = nameInput.value.trim();
+            const identifier = identifierInput.value.trim();
+            const size = sizeInput.value.trim();
+            const specifications = specificationsInput.value.trim();
+            const category = categorySelect.value;
+
+            if (!name || !identifier) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Create new tool
+            const newTool = {
+                name,
+                identifier,
+                size: size || '',
+                specifications: specifications || `${name} tool`,
+                category
+            };
+
+            try {
+                const addedTool = stateManager.addTool(newTool);
+                updateToolsDatabase();
+
+                hideModal();
+                console.log('Added new tool:', addedTool);
+            } catch (error) {
+                alert('Error adding tool: ' + error.message);
+            }
+        };
+    }
+}
+
+/**
+ * Show modal for adding new fixture
+ */
+function showAddFixtureModal() {
+    const modalContent = `
+        <div class="add-fixture-modal-form">
+            <div class="form-group">
+                <label for="modal-fixture-name" class="form-label required">Fixture Name</label>
+                <input
+                    type="text"
+                    id="modal-fixture-name"
+                    class="form-input"
+                    placeholder="e.g., Assembly Jig"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-fixture-identifier" class="form-label required">Fixture Identifier</label>
+                <input
+                    type="text"
+                    id="modal-fixture-identifier"
+                    class="form-input"
+                    placeholder="e.g., FIX-001"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="modal-fixture-description" class="form-label">Description</label>
+                <textarea
+                    id="modal-fixture-description"
+                    class="form-textarea"
+                    placeholder="Describe the fixture and its purpose..."
+                    rows="3"
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-fixture-category" class="form-label">Category</label>
+                <select id="modal-fixture-category" class="form-select">
+                    <option value="Assembly">Assembly Fixtures</option>
+                    <option value="Testing">Testing Fixtures</option>
+                    <option value="Holding">Holding Fixtures</option>
+                    <option value="Alignment">Alignment Fixtures</option>
+                    <option value="Welding">Welding Fixtures</option>
+                    <option value="Inspection">Inspection Fixtures</option>
+                    <option value="General">General Fixtures</option>
+                </select>
+            </div>
+        </div>
+    `;
+
+    showModal('Add Fixture', modalContent, true);
+
+    // Override confirm button behavior
+    const confirmButton = document.getElementById('modal-confirm');
+    if (confirmButton) {
+        confirmButton.onclick = () => {
+            const nameInput = document.getElementById('modal-fixture-name');
+            const identifierInput = document.getElementById('modal-fixture-identifier');
+            const descriptionInput = document.getElementById('modal-fixture-description');
+            const categorySelect = document.getElementById('modal-fixture-category');
+
+            const name = nameInput.value.trim();
+            const identifier = identifierInput.value.trim();
+            const description = descriptionInput.value.trim();
+            const category = categorySelect.value;
+
+            if (!name || !identifier) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Create new fixture
+            const newFixture = {
+                name,
+                identifier,
+                description: description || `${name} fixture`,
+                category
+            };
+
+            try {
+                const addedFixture = stateManager.addFixture(newFixture);
+                updateFixturesDatabase();
+
+                hideModal();
+                console.log('Added new fixture:', addedFixture);
+            } catch (error) {
+                alert('Error adding fixture: ' + error.message);
+            }
+        };
+    }
+}
+
+/**
  * Validate BOM form
  */
 function validateBOMForm() {
@@ -3949,11 +4870,18 @@ function updateAssemblyDisplay() {
                 </div>
                 
                 <div class="assembly-step-body">
-                    <div class="assembly-step-image">
-                        <div class="image-placeholder">
-                            <span class="image-placeholder-icon">📷</span>
-                            <span class="image-placeholder-text">Step Image</span>
-                        </div>
+                    <div class="assembly-step-image" onclick="changeStepImage('${step.id}')" style="cursor: pointer;" title="Click to add/change image">
+                        ${step.image ? `
+                            <img src="${step.image}" alt="Step ${step.stepNumber} image" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md);">
+                            <div class="image-overlay">
+                                <span class="image-overlay-text">Click to change</span>
+                            </div>
+                        ` : `
+                            <div class="image-placeholder">
+                                <span class="image-placeholder-icon">📷</span>
+                                <span class="image-placeholder-text">Click to add image</span>
+                            </div>
+                        `}
                     </div>
                     
                     <div class="assembly-step-content">
@@ -4045,13 +4973,29 @@ function showAddAssemblyStepModal() {
         <div class="assembly-step-modal-form">
             <div class="form-group">
                 <label for="modal-step-description" class="form-label required">Step Description</label>
-                <textarea 
-                    id="modal-step-description" 
-                    class="form-textarea" 
+                <textarea
+                    id="modal-step-description"
+                    class="form-textarea"
                     placeholder="Describe what needs to be done in this step..."
                     rows="3"
                     required
                 ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-step-image" class="form-label">Step Image</label>
+                <input
+                    type="file"
+                    id="modal-step-image"
+                    class="form-input"
+                    accept="image/*"
+                    aria-describedby="modal-step-image-help"
+                >
+                <small id="modal-step-image-help" class="form-help">Upload an image to illustrate this assembly step (optional)</small>
+                <div id="modal-step-image-preview" class="image-preview" style="display: none;">
+                    <img id="modal-step-image-preview-img" src="" alt="Step image preview" style="max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 8px;">
+                    <button type="button" id="modal-step-image-remove" class="remove-image-btn" style="margin-left: 8px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                </div>
             </div>
             
             <div class="form-group">
@@ -4144,10 +5088,36 @@ function showAddAssemblyStepModal() {
     // Setup quality check toggle
     const qualityCheckbox = document.getElementById('modal-step-quality');
     const qualityDescGroup = document.getElementById('quality-description-group');
-    
+
     if (qualityCheckbox && qualityDescGroup) {
         qualityCheckbox.addEventListener('change', (e) => {
             qualityDescGroup.style.display = e.target.checked ? 'block' : 'none';
+        });
+    }
+
+    // Setup image upload handling
+    const imageInput = document.getElementById('modal-step-image');
+    const imagePreview = document.getElementById('modal-step-image-preview');
+    const imagePreviewImg = document.getElementById('modal-step-image-preview-img');
+    const imageRemoveBtn = document.getElementById('modal-step-image-remove');
+
+    if (imageInput && imagePreview && imagePreviewImg && imageRemoveBtn) {
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreviewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        imageRemoveBtn.addEventListener('click', () => {
+            imageInput.value = '';
+            imagePreview.style.display = 'none';
+            imagePreviewImg.src = '';
         });
     }
     
@@ -4165,6 +5135,8 @@ function showAddAssemblyStepModal() {
             const qualityCheck = document.getElementById('modal-step-quality').checked;
             const qualityDescription = document.getElementById('modal-step-quality-desc').value.trim();
             const notes = document.getElementById('modal-step-notes').value.trim();
+            const imageInput = document.getElementById('modal-step-image');
+            const imageFile = imageInput.files[0];
             
             if (!description) {
                 alert('Please provide a step description');
@@ -4195,6 +5167,31 @@ function showAddAssemblyStepModal() {
                 allSafety.push(safetyText);
             }
             
+            // Handle image upload
+            let imageData = null;
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const stepData = {
+                        description,
+                        parts: selectedParts,
+                        tools: selectedTools,
+                        fixtures: selectedFixtures,
+                        safety: allSafety,
+                        estimatedTime,
+                        qualityCheck,
+                        qualityDescription: qualityCheck ? qualityDescription : '',
+                        notes,
+                        image: e.target.result // Base64 encoded image
+                    };
+
+                    addAssemblyStep(stepData);
+                    hideModal();
+                };
+                reader.readAsDataURL(imageFile);
+                return; // Exit early, will be handled by FileReader callback
+            }
+
             const stepData = {
                 description,
                 parts: selectedParts,
@@ -4204,7 +5201,8 @@ function showAddAssemblyStepModal() {
                 estimatedTime,
                 qualityCheck,
                 qualityDescription: qualityCheck ? qualityDescription : '',
-                notes
+                notes,
+                image: null
             };
             
             addAssemblyStep(stepData);
@@ -4415,5 +5413,13 @@ window.SOPGenerator = {
     }
 };
 
-// Make safety functions globally accessible for HTML onclick handlers
-window.removeSafetyRequirement = removeSafetyRequirement; 
+// Make functions globally accessible for HTML onclick handlers
+window.removeSafetyRequirement = removeSafetyRequirement;
+window.editAssemblyStep = editAssemblyStep;
+window.moveAssemblyStep = moveAssemblyStep;
+window.removeAssemblyStep = removeAssemblyStep;
+window.changeStepImage = changeStepImage;
+window.showCompanySetup = showCompanySetup;
+window.printSOP = printSOP;
+window.exportSOP = exportSOP;
+window.editSOP = editSOP;
